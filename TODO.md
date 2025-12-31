@@ -1,34 +1,41 @@
 # TODO
 
-## DONE Create a config model
+## TODO xxx
+
+### DONE Create a config model
 The config model should be in the `model.config` class. It should allow settnig the device address of a trainer, and the FTP of a user.
 
-## TODO Implement a BLE discovery stub
+### DONE Implement a bootstrap module
+There should be a module `cytraco.bootstrap` responsible for initializing the application. It should, at a later stage, put everything together, start threads etc. It should expose two protocols – Configurable with the method `load_file` (read config from TOML) and `write_file` (write to TOML), and Runnable with the method `start` (begin execution).
+
+## Old tasks
+
+### TODO Implement a BLE discovery stub
 It should be possible to invoke it in a dummy mode in order to simplify development an testing. I may not always have an actual trainer nearby. Perhaps a --demo switch or something like that.
 
-## TODO Implement BLE device discovery 
+### TODO Implement BLE device discovery 
 Bluetooth BLE devices needs to be discovered, and returned for the user to select for pairing at a later stage.
 
-## TODO User interface for selecting trainer
+### TODO User interface for selecting trainer
 The GUI should show some sort of activity indicator while discovery is ongoing. Once the discovery codes has returned a list of devices, it should show them to the user, and allow selecting one. 
 
-## TODO Store selected trainer
+### TODO Store selected trainer
 The trainer selected by the user should be stored as a default for later. If Cytraco starts, and it has a trainer stored as default, it should attempt to connect to it. Upon failure it should display an error message to the user prompting him to ensure the trainer is turned on etc.
 
-## TODO Add FTMS protocol for resistance control 
+### TODO Add FTMS protocol for resistance control 
 This should allow setting a specific wattage on the trainer. The interface should enable increasing the resistance with a fixed amount, perhaps in the form of a virtual incline. The purpose of this is to make it possible to switch between work and rest intervals without making big jumps in cadence, e.g. being able to run the work interval at 330 W 100 rpm and then the rest interval at 150W 80 rpm. It will be used by the workout executor to automatically switch the virtual incline between intervals.
 
 Presently, Cytraco sets a relative resistance in percent of maximum. This differs from trainer to trainer, as both the minimum and maximum are different (and probably variable). Ideally the resistance should be set to match the desired power output at a certain RPM. But this seems a bit tricky.
 
-## TODO Read power data from trainer
+### TODO Read power data from trainer
 Power should be read from the trainer every n seconds (default n = 1). It should be displayed in the UI as "Power(ns) xW", e.g. "Power(3s) 214W". This should be on a single line that keeps updating in place.
 
-## TODO Implement the workout plan
+### TODO Implement the workout plan
 There are two kind of intervals; strict and loose. A strict interval has a set cutoff power, and you can fail it. A loose interval is best effort (rest, cooldown etc) and cannot fail. The current `model.Interval` implementation should be expanded to accomodate this, perhaps with subclassing. Resistance is tricky. I think we need to calibrate the trainer to figure out the approximate resistance to get a certain power at a given RPM. But for now let's just wing it, and set grade to 30% for work intervals and 10% for other intervals.
 
-## TODO Implement interval logic with adaptive stopping
+### TODO Implement interval logic with adaptive stopping
 
-### Sub-tasks:
+#### Sub-tasks:
 - Add `target_power_pct` field to interval definitions in intervals.toml (e.g., 115 for 115% of FTP)
 - Load user FTP from config file (currently static at 300W in config.py User class)
 - Implement interval repetition logic (work interval → rest interval → work interval...)
@@ -38,13 +45,13 @@ There are two kind of intervals; strict and loose. A strict interval has a set c
 - Calculate cutoff power = target_power × (1 - average(drop_pct))
 - Auto-end workout when power drops below cutoff after 3+ intervals
 
-## TODO Add warmup interval
+### TODO Add warmup interval
 This should be the first interval, and should stay at 50% of the work interval power. It lasts until the user hits "return", and there should be a text saying something like "Warming up. Hit return to start the workout!"
 
-## TODO Make the controller operate on intervals instead of workout
+### TODO Make the controller operate on intervals instead of workout
 The controller appears to be more focused on intervals than the workout. It should thus be changed to operator in intervals. Also, instead of naming the class variable "model", it should be called "interval". When the controller needs access to the enclosing workout, the interval should provide access to that.
 
-## TODO Clean up output handling in the UI
+### TODO Clean up output handling in the UI
 Right now the output is scattered across several methods that typically works by setting up 3–4 files that are then output. We should have a display class of some sort. It should take the various parts of the output – header, footer and whatnot, and emit it in a uniform manner. The output should look like this:
 
   Cycle 1: WORK up at comfortable pace
@@ -59,20 +66,20 @@ The lines are:
   Interval information
   Commands
   
-## TODO Main intervals should not be skipped
+### TODO Main intervals should not be skipped
 The skip logic is too simple. It would work for a sequential workout, but the Cytraco workouts consist of a warmup and cooldown, with a loop of work and rest intervals in between. Skipping the warmup is fine (and perhaps it should even be mandatory, i.e. "begin" rather than "skip". Skipping the cooldown is effectively "quit". But the work/rest intervals has the effect of _ending_ the work, only the optional cooldown is left. So instead of 's' for skip, I tink this should be more of a "move on to the next phase". Perhaps "Enter to <begin|end|quit>"? So the full menu becomes "(q)uit  (+)5%  (-)5%   (return) to <op>".
 
-## TODO Static display
+### TODO Static display
 The display should have static fields that are present (possibly without data) in all modes. For instance, target power should be visible in the cooldown phase too, but with the value "N/A" or similar. This makes the display code simpler.
 
-## TODO Add a line in the display for time
+### TODO Add a line in the display for time
 This should show total/elapsed/remaining time. Perhaps something like this:
 
 [Time] total: 01:03:34  elapsed: 2:46  remaining: 00:14
 
 Where total is the total time of the workout and elasped/remaining refers to the interval.
 
-## TODO Add display model
+### TODO Add display model
 There should be a model for the display too. Right now, we have a model of the workout, but the UI should have its own model that should allow things like:
 
 - Show the target power as "N/A" instead of an integer
@@ -80,19 +87,19 @@ There should be a model for the display too. Right now, we have a model of the w
 
 I have implemented a skeleton display model in the UI module. It is based on data and key fields collected in panels, and assembled in a Display class. An instance of this should be kept in TerminalUI, partially filled in. Perhaps the optional fields need to be annotated with "| None" or whatever? The existing show_*_status functions should be merged into a show_display function, that fills fills in a copy of the Display object and calls render with it. So the render functions needs to be updated to operate on a Display object instead of the exsiting keyword parameters. As an alternative, there could perhaps be a DisplayConsole subclass of the Display dataclass that has rendering capabilities?
 
-## TODO Show cutoff power
+### TODO Show cutoff power
 
-## TODO Fix terminate if below cutoff
+### TODO Fix terminate if below cutoff
 
-## TODO Add pause?
+### TODO Add pause?
 
-## TODO +/- 2%
+### TODO +/- 2%
 5% is a bit too much. The scale does not feel linear. E.g. the jump from 25% to 30% adds maybe 60W.
 
-## TODO Add message line
+### TODO Add message line
 This is needed to show message such as "Below cutoff power – going to cooldown"
 
-## TODO Switch to Rich for TUI
+### TODO Switch to Rich for TUI
 The current display is implemented by writing text with a few ANSI escapes to stdout, and looks something like this:
 
 -- WARMUP ---------------- VO2max, 10 min @ 115% --------------

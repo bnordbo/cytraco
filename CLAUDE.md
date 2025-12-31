@@ -20,6 +20,9 @@ Additionally:
 - Be brief in all interactions. 
 - Don't use unnecessary courtesies. 
 
+## Commits
+- Never start a plan on a dirty repo. Changes must be committed first.
+
 ## Commands
 
 ```bash
@@ -40,3 +43,4 @@ coverage report
 
 ## Common mistakes
 - Test data should be generated, _not_ literals.
+- Don't write old school code, i.e. use `Path` instead of `str`.
