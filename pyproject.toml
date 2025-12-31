@@ -1,0 +1,42 @@
+[project]
+name = "cytraco"
+version = "2.0.0"
+description = "Cycling trainer controller for automated interval workouts"
+requires-python = ">=3.13"
+dependencies = [
+    "pycycling>=0.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0",
+]
+
+[project.scripts]
+cytraco = "cytraco.cli:app"
+
+[tool.coverage.run]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.importlinter]
+root_package = "cytraco"
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "Enforce the basic application layers"
+type = "layers"
+layers = [
+    "cytraco.ui | cytraco.config",
+    "cytraco.workout",
+    "cytraco.model",
+]
+
+[tool.ruff]
+line-length=100
+
+[tool.ruff.lint]
+extend-select = [
+    "E501",
+]
