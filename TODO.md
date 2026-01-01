@@ -1,12 +1,18 @@
 # TODO
 
-## TODO xxx
+## TODO Framework for configuration and trainer detection
 
 ### DONE Create a config model
 The config model should be in the `model.config` class. It should allow settnig the device address of a trainer, and the FTP of a user.
 
 ### DONE Implement a bootstrap module
 There should be a module `cytraco.bootstrap` responsible for initializing the application. It should, at a later stage, put everything together, start threads etc. It should expose two protocols – Configurable with the method `load_file` (read config from TOML) and `write_file` (write to TOML), and Runnable with the method `start` (begin execution).
+
+### TODO Implement PowerMeter protocol
+This should provide power updates from a trainer (or some other source, like a power meter pedal). The protocol should produce PowerData events (objects) on a queue for a client (like a UI) to consume. The protocol will be implemented by classes like PyCycleClient or something like that. They will set up the queue and start/stop it. The protocol will be part of the `cytraco.workout` module.
+
+### TODO Use the pycycle library to detect a trainer
+Detect available trainers, and allow the user to select one using a simple menu. There will usually only be one, so prompt e.g. "Use Wahoo Kickr Core <mac address> (y/n)". If there are multiple, allow selecting one by listing them with a number and have the user enter a number. Exit with an error code if the wrong number is enter, or if no trainers are available.
 
 ## Old tasks
 

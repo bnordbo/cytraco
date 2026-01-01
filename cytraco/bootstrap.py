@@ -11,7 +11,7 @@ from typing import Protocol
 from cytraco.model.config import Config
 
 
-class Configurable(Protocol):
+class AppConfig(Protocol):
     """Protocol for configuration management.
 
     Classes implementing this protocol can load and persist configuration
@@ -46,7 +46,7 @@ class Configurable(Protocol):
         ...
 
 
-class Runnable(Protocol):
+class AppRunner(Protocol):
     """Protocol for runnable application components.
 
     Classes implementing this protocol can be started and will run until

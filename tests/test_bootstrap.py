@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cytraco.bootstrap import Configurable, Runnable
+from cytraco.bootstrap import AppConfig, AppRunner
 from cytraco.model.config import Config
 from tests import generators as generate
 
@@ -35,7 +35,7 @@ class MockRunnable:
 
 def test_configurable_protocol_load_file() -> None:
     """Configurable implementations should load config from file."""
-    configurable: Configurable = MockConfigurable()
+    configurable: AppConfig = MockConfigurable()
     config = configurable.load_file(Path("test.toml"))
     assert isinstance(config, Config)
     assert config.device_address is not None
@@ -44,12 +44,12 @@ def test_configurable_protocol_load_file() -> None:
 
 def test_configurable_protocol_write_file() -> None:
     """Configurable implementations should write config to file."""
-    configurable: Configurable = MockConfigurable()
+    configurable: AppConfig = MockConfigurable()
     configurable.write_file(Path("test.toml"))
 
 
 def test_runnable_protocol_start() -> None:
     """Runnable implementations should start correctly."""
-    runnable: Runnable = MockRunnable()
+    runnable: AppRunner = MockRunnable()
     runnable.start()
     assert runnable.started
