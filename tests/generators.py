@@ -2,6 +2,8 @@
 
 import random
 
+from cytraco.model.power import PowerData
+
 
 def mac_address() -> str:
     """Generate a random MAC address for testing."""
@@ -11,3 +13,8 @@ def mac_address() -> str:
 def ftp() -> int:
     """Generate a random FTP value for testing."""
     return random.randint(150, 400)
+
+
+def power_data() -> PowerData:
+    """Generate random PowerData for testing."""
+    return PowerData(power=random.randint(100, 400))
