@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cytraco.errors import DeviceError
+from cytraco import errors
 from cytraco.trainer import scan_for_trainers
 
 
@@ -23,7 +23,7 @@ async def test_scan_for_trainers_finds_trainers(monkeypatch: pytest.MonkeyPatch)
     mock_discover = AsyncMock(
         return_value={"AA:BB:CC:DD:EE:FF": (mock_device, mock_adv)}
     )
-    monkeypatch.setattr("cytraco.trainer.BleakScanner.discover", mock_discover)
+    monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
     trainers = await scan_for_trainers()
 
@@ -38,7 +38,7 @@ async def test_scan_for_trainers_finds_trainers(monkeypatch: pytest.MonkeyPatch)
 async def test_scan_for_trainers_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     """Scanner should pass timeout parameter to discover."""
     mock_discover = AsyncMock(return_value={})
-    monkeypatch.setattr("cytraco.trainer.BleakScanner.discover", mock_discover)
+    monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
     await scan_for_trainers(timeout=10.0)
 
@@ -49,7 +49,7 @@ async def test_scan_for_trainers_timeout(monkeypatch: pytest.MonkeyPatch) -> Non
 async def test_scan_for_trainers_no_trainers(monkeypatch: pytest.MonkeyPatch) -> None:
     """Scanner should return empty list when no trainers found."""
     mock_discover = AsyncMock(return_value={})
-    monkeypatch.setattr("cytraco.trainer.BleakScanner.discover", mock_discover)
+    monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
     trainers = await scan_for_trainers()
 
@@ -60,9 +60,9 @@ async def test_scan_for_trainers_no_trainers(monkeypatch: pytest.MonkeyPatch) ->
 async def test_scan_for_trainers_error_handling(monkeypatch: pytest.MonkeyPatch) -> None:
     """Scanner should raise DeviceConnectionError on BLE failure."""
     mock_discover = AsyncMock(side_effect=Exception("BLE error"))
-    monkeypatch.setattr("cytraco.trainer.BleakScanner.discover", mock_discover)
+    monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    with pytest.raises(DeviceError) as exc_info:
+    with pytest.raises(errors.DeviceError) as exc_info:
         await scan_for_trainers()
 
     assert "BLE scan failed" in str(exc_info.value)
@@ -81,7 +81,7 @@ async def test_scan_for_trainers_unknown_name(monkeypatch: pytest.MonkeyPatch) -
     mock_discover = AsyncMock(
         return_value={"AA:BB:CC:DD:EE:FF": (mock_device, mock_adv)}
     )
-    monkeypatch.setattr("cytraco.trainer.BleakScanner.discover", mock_discover)
+    monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
     trainers = await scan_for_trainers()
 

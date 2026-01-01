@@ -3,9 +3,9 @@
 import sys
 from dataclasses import dataclass
 
-from bleak import BleakScanner
+import bleak
 
-from cytraco.errors import DeviceError
+from cytraco import errors
 
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
@@ -39,13 +39,13 @@ async def scan_for_trainers(timeout: float = 5.0) -> list[TrainerInfo]:
         DeviceError: If BLE scanning fails
     """
     try:
-        devices = await BleakScanner.discover(
+        devices = await bleak.BleakScanner.discover(
             timeout=timeout,
             service_uuids=[FTMS_SERVICE_UUID],
             return_adv=True,
         )
     except Exception as e:
-        raise DeviceError(f"BLE scan failed: {e}") from e
+        raise errors.DeviceError(f"BLE scan failed: {e}") from e
 
     return [
         TrainerInfo(name=d.name or "Unknown", address=d.address, rssi=adv.rssi)
