@@ -30,8 +30,8 @@ name = "Enforce the basic application layers"
 type = "layers"
 layers = [
     "cytraco.ui | cytraco.config",
-    "cytraco.workout",
-    "cytraco.model",
+    "cytraco.workout | cytraco.bootstrap",
+    "cytraco.errors | cytraco.model",
 ]
 
 [tool.ruff]

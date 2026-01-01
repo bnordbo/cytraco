@@ -21,7 +21,7 @@ class PowerMeter(Protocol):
         This method may initialize BLE connections and enable notifications.
 
         Raises:
-            RuntimeError: If monitoring cannot be started or device is unavailable.
+            PowerMeterError: If monitoring cannot be started or device is unavailable.
         """
         ...
 
@@ -32,7 +32,7 @@ class PowerMeter(Protocol):
         accessible for reading any remaining data.
 
         Raises:
-            RuntimeError: If monitoring cannot be stopped cleanly.
+            PowerMeterError: If monitoring cannot be stopped cleanly.
         """
         ...
 

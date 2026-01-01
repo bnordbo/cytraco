@@ -61,7 +61,7 @@ class AppRunner(Protocol):
         Implementations should handle cleanup and graceful shutdown.
 
         Raises:
-            RuntimeError: If the component cannot be started or encounters
+            AppRunnerError: If the component cannot be started or encounters
                 a fatal error during execution.
         """
         ...
