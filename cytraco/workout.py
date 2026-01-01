@@ -36,8 +36,9 @@ class PowerMeter(Protocol):
         """
         ...
 
-    def get_queue(self) -> asyncio.Queue[PowerData]:
-        """Get the queue containing power measurements.
+    @property
+    def queue(self) -> asyncio.Queue[PowerData]:
+        """Queue containing power measurements.
 
         Returns:
             Queue that receives PowerData objects as they are measured.

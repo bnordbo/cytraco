@@ -25,8 +25,9 @@ class MockPowerMeter:
         """Mock stop implementation."""
         self._running = False
 
-    def get_queue(self) -> asyncio.Queue[PowerData]:
-        """Mock get_queue implementation."""
+    @property
+    def queue(self) -> asyncio.Queue[PowerData]:
+        """Mock queue property implementation."""
         return self._queue
 
 
@@ -52,20 +53,6 @@ async def test_power_meter_queue() -> None:
     """PowerMeter queue should contain PowerData objects."""
     meter: PowerMeter = MockPowerMeter()
     await meter.start()
-    queue = meter.get_queue()
-    data = await queue.get()
+    data = await meter.queue.get()
     assert isinstance(data, PowerData)
     assert isinstance(data.power, int)
-
-
-@pytest.mark.asyncio
-async def test_power_meter_type_check() -> None:
-    """MockPowerMeter should satisfy PowerMeter protocol."""
-    mock = MockPowerMeter()
-
-    async def accepts_power_meter(pm: PowerMeter) -> asyncio.Queue[PowerData]:
-        await pm.start()
-        return pm.get_queue()
-
-    queue = await accepts_power_meter(mock)
-    assert isinstance(queue, asyncio.Queue)
