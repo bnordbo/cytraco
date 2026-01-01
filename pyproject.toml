@@ -5,6 +5,7 @@ description = "Cycling trainer controller for automated interval workouts"
 requires-python = ">=3.13"
 dependencies = [
     "pycycling>=0.4.0",
+    "bleak>=0.21.0",
 ]
 
 [project.optional-dependencies]
@@ -29,7 +30,7 @@ include_external_packages = false
 name = "Enforce the basic application layers"
 type = "layers"
 layers = [
-    "cytraco.ui | cytraco.config",
+    "cytraco.ui | cytraco.config | cytraco.trainer",
     "cytraco.workout | cytraco.bootstrap",
     "cytraco.errors | cytraco.model",
 ]

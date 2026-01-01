@@ -43,6 +43,8 @@ coverage report
 
 ## Common mistakes
 - Test data should be generated, _not_ literals.
+- Don't create test generators for maps and lists.
 - Don't write old school code, i.e. use `Path` instead of `str`.
 - Don't add separate tests for checking type annotations.
 - Don't use Java-style getters. Use property annotations instead.
+- Prefer simple list comprehensions to for loops for constructing collections.

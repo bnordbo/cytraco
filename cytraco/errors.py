@@ -30,3 +30,12 @@ class AppRunnerError(CytracoError):
     """
 
     pass
+
+
+class DeviceError(CytracoError):
+    """Exception raised during device connection or usage.
+
+    Raised when a BLE operation on a device fails..
+    """
+
+    pass
