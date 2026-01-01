@@ -44,3 +44,5 @@ coverage report
 ## Common mistakes
 - Test data should be generated, _not_ literals.
 - Don't write old school code, i.e. use `Path` instead of `str`.
+- Don't add separate tests for checking type annotations.
+- Don't use Java-style getters. Use property annotations instead.

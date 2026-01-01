@@ -14,6 +14,9 @@ This should provide power updates from a trainer (or some other source, like a p
 ### DONE Add an exception hierarchy
 I think there should be a root exception, perhaps in `cytraco.errors`, e.g. `CytracoError`, and replace uses of `RuntimeError` with more implementaitons of more appropriate exceptions like `PowerMeterError` that wraps the underlying exception, if applicable. All relevant exception code and documentation should be updated accordingly. 
 
+### TODO Error handling for async queue
+Error should be put on the queue and handled by the sink.
+
 ### TODO Use the pycycle library to detect a trainer
 Detect available trainers, and allow the user to select one using a simple menu. There will usually only be one, so prompt e.g. "Use Wahoo Kickr Core <mac address> (y/n)". If there are multiple, allow selecting one by listing them with a number and have the user enter a number. Exit with an error code if the wrong number is enter, or if no trainers are available.
 
