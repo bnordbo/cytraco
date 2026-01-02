@@ -1,11 +1,16 @@
 """Trainer detection and BLE scanning."""
 
-import sys
 from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import bleak
 
 from cytraco import errors
+from cytraco.model.config import Config
+
+if TYPE_CHECKING:
+    from cytraco.bootstrap import AppConfig
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -52,24 +57,39 @@ async def scan_for_trainers() -> list[TrainerInfo]:
     ]
 
 
-async def detect_trainer() -> None:
-    """Detect and report available trainers.
+async def detect_trainer(config_handler: "AppConfig", config_path: Path) -> TrainerInfo:
+    """Detect and persist trainer selection.
 
-    Scans for BLE trainers and reports the result. If exactly one trainer is
-    found, prints the trainer name and exits successfully. Otherwise, exits with
-    an error.
+    Scans for BLE trainers and handles selection. If exactly one trainer is
+    found, saves it to config and returns it. Otherwise raises an error.
+    Preserves existing config values (like FTP) when updating device address.
+
+    Args:
+        config_handler: AppConfig implementation for persisting selection
+        config_path: Path to configuration file
+
+    Returns:
+        TrainerInfo for the detected trainer
 
     Raises:
-        SystemExit: Always (with code 0 on success, 1 on error)
+        DeviceError: If no trainers found or multiple trainers found
     """
     trainers = await scan_for_trainers()
 
     if len(trainers) == 0:
-        print("Error: No trainers found")
-        sys.exit(1)
-    elif len(trainers) > 1:
-        print(f"Error: Found {len(trainers)} trainers, expected exactly 1")
-        sys.exit(1)
-    else:
-        print(f"Found trainer: {trainers[0].name}")
-        sys.exit(0)
+        raise errors.DeviceError("No trainers found")
+    if len(trainers) > 1:
+        raise errors.DeviceError(f"Found {len(trainers)} trainers, expected exactly 1")
+
+    # Load existing config or create new one
+    try:
+        config = config_handler.load_file(config_path)
+    except errors.ConfigError:
+        config = Config()
+
+    # Update device address and save
+    trainer = trainers[0]
+    config.device_address = trainer.address
+    config_handler.write_file(config_path, config)
+
+    return trainer

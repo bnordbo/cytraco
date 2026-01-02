@@ -33,15 +33,15 @@ class AppConfig(Protocol):
         """
         ...
 
-    def write_file(self, path: Path) -> None:
+    def write_file(self, path: Path, config: Config) -> None:
         """Write configuration to a file.
 
         Args:
             path: Path where configuration will be written.
+            config: Configuration object to write.
 
         Raises:
-            PermissionError: If the file cannot be written.
-            ValueError: If the configuration contains invalid values.
+            ConfigError: If the file cannot be written or config is invalid.
         """
         ...
 

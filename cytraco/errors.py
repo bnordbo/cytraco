@@ -35,3 +35,11 @@ class DeviceError(CytracoError):
     Raised when a BLE operation on a device fails..
     """
 
+
+
+class ConfigError(CytracoError):
+    """Exception raised during configuration operations.
+
+    Raised when configuration file operations fail (read, write, parse).
+    """
+

@@ -21,7 +21,7 @@ class MockConfigurable:
         """Mock load_file implementation."""
         return Config(device_address=generate.mac_address(), ftp=generate.ftp())
 
-    def write_file(self, _path: Path) -> None:
+    def write_file(self, _path: Path, _config: Config) -> None:
         """Mock write_file implementation."""
 
 
@@ -49,7 +49,8 @@ def test_configurable_protocol_load_file() -> None:
 def test_configurable_protocol_write_file() -> None:
     """Configurable implementations should write config to file."""
     configurable: AppConfig = MockConfigurable()
-    configurable.write_file(Path("test.toml"))
+    config = generate.config()
+    configurable.write_file(Path("test.toml"), config)
 
 
 def test_runnable_protocol_start() -> None:
