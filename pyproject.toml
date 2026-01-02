@@ -12,6 +12,7 @@ dependencies = [
 dev = [
     "pytest>=9.0",
     "pytest-asyncio>=0.24.0",
+    "vulture>=2.0",
 ]
 
 [project.scripts]
@@ -40,5 +41,61 @@ line-length=100
 
 [tool.ruff.lint]
 extend-select = [
-    "E501",
+    "ARG",
+    "ANN",
+    "ASYNC",
+    "B",
+    "BLE",
+    "COM",
+    "C4",
+    "C90",
+    "D",
+    "DOC",
+    "E",
+    "EM",
+    "ERA",
+    "EXE",
+    "F",
+    "FBT",
+    "FURB",
+    "FLY",
+    "G",
+    "I",
+    "ICN",
+    "INP",
+    "ISC",
+    "LOG",
+    "N",
+    "PERF",
+    "PIE",
+    "PL",
+    "PLE",
+    "PLR",
+    "PLW",
+    "PT",
+    "PTH",
+    "PYI",
+    "RUF",
+    "Q",
+    "RET",
+    "RSE",
+    "S",
+    "SIM",
+    "SLF",
+    "SLOT",
+    "T10",
+    "TID",
+    "TRY",
+    "TC",
+    "UP",
+    "YTT",
+    "W",
 ]
+ignore = [
+    "S101",
+]
+
+[tool.vulture]
+min_confidence = 80
+paths = ["cytraco", "tests", ".vulture_whitelist.py"]
+exclude = []

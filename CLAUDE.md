@@ -15,6 +15,7 @@ Additionally:
 - Tests passing.
 - Linter passing.
 - Coverage is same or better.
+- No dead code (vulture).
 
 ## Communication
 - Be brief in all interactions. 
@@ -39,6 +40,9 @@ ruff check .
 # Run coverage
 coverage run -m pytest
 coverage report
+
+# Check for dead code
+vulture
 ```
 
 ## Common mistakes

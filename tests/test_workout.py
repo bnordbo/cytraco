@@ -36,7 +36,7 @@ async def test_power_meter_start() -> None:
     """PowerMeter implementations should start correctly."""
     meter: PowerMeter = MockPowerMeter()
     await meter.start()
-    assert meter._running
+    assert meter._running  # noqa: SLF001
 
 
 @pytest.mark.asyncio
@@ -45,7 +45,7 @@ async def test_power_meter_stop() -> None:
     meter: PowerMeter = MockPowerMeter()
     await meter.start()
     await meter.stop()
-    assert not meter._running
+    assert not meter._running  # noqa: SLF001
 
 
 @pytest.mark.asyncio
