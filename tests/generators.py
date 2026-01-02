@@ -4,6 +4,7 @@
 
 import random
 
+from cytraco.model.config import Config
 from cytraco.model.power import PowerData
 from cytraco.trainer import TrainerInfo
 
@@ -28,4 +29,12 @@ def trainer_info() -> TrainerInfo:
     names = ["Tacx Neo 2T", "Wahoo KICKR", "Elite Direto", "Saris H3"]
     return TrainerInfo(
         name=random.choice(names), address=mac_address(), rssi=random.randint(-90, -30),
+    )
+
+
+def config() -> Config:
+    """Generate random Config for testing."""
+    return Config(
+        ftp=ftp(),
+        device_address=mac_address(),
     )
