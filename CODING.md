@@ -8,3 +8,9 @@ Use the code style specified in [PEP8](https://peps.python.org/pep-0008/) as a b
 - Always use [type hints](https://peps.python.org/pep-0484/) for method argument and return values.
 - Prefer [union types](https://peps.python.org/pep-0604/) to `Optional` for type hints.
 - Only import frequently used members.
+- Prefer simple list comprehensions to for loops for constructing collections.
+- Import modules for context, e.g. `import asyncio`.
+- Import commonly used names, e.g. `from dataclasses import dataclass`. 
+- Use import aliases as appropriate, e.g. `import numpy as np`. 
+- Always use a trailing comma in function calls, function definitions, literals, etc.
+- Test data should be generated, _not_ literals.
