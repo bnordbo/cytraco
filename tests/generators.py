@@ -29,8 +29,3 @@ def trainer_info() -> TrainerInfo:
     return TrainerInfo(
         name=random.choice(names), address=mac_address(), rssi=random.randint(-90, -30),
     )
-
-
-def trainer_info_list(count: int = 3) -> list[TrainerInfo]:
-    """Generate list of TrainerInfo for testing."""
-    return [trainer_info() for _ in range(count)]
