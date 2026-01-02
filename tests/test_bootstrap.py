@@ -14,12 +14,12 @@ class MockConfigurable:
     """Mock implementation of Configurable for testing."""
 
     def __init__(self) -> None:
-        """Initialize mock with empty config."""
-        self._config = Config()
+        """Initialize mock with default config."""
+        self._config = Config(ftp=generate.ftp())
 
     def load_file(self, _path: Path) -> Config:
         """Mock load_file implementation."""
-        return Config(device_address=generate.mac_address(), ftp=generate.ftp())
+        return Config(ftp=generate.ftp(), device_address=generate.mac_address())
 
     def write_file(self, _path: Path, _config: Config) -> None:
         """Mock write_file implementation."""

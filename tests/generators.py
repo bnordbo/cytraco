@@ -35,6 +35,6 @@ def trainer_info() -> TrainerInfo:
 def config() -> Config:
     """Generate random Config for testing."""
     return Config(
-        device_address=mac_address(),
         ftp=ftp(),
+        device_address=mac_address(),
     )

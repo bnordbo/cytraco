@@ -113,7 +113,7 @@ async def test_detect_trainer_single_trainer_persists(monkeypatch: pytest.Monkey
 
     # Mock AppConfig
     mock_config_handler = MagicMock()
-    mock_config_handler.load_file.side_effect = errors.ConfigError("File not found")
+    mock_config_handler.load_file.side_effect = FileNotFoundError("File not found")
     config_path = Path("/fake/config.toml")
 
     result = await detect_trainer(mock_config_handler, config_path)
@@ -150,8 +150,8 @@ async def test_detect_trainer_preserves_ftp(monkeypatch: pytest.MonkeyPatch) -> 
     existing_ftp = generate.ftp()
     mock_config_handler = MagicMock()
     mock_config_handler.load_file.return_value = Config(
-        device_address=generate.mac_address(),
         ftp=existing_ftp,
+        device_address=generate.mac_address(),
     )
     config_path = Path("/fake/config.toml")
 

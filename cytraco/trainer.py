@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 import bleak
 
 from cytraco import errors
-from cytraco.model.config import Config
+from cytraco.model import config as cfg
 
 if TYPE_CHECKING:
-    from cytraco.bootstrap import AppConfig
+    from cytraco import bootstrap
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -57,7 +57,7 @@ async def scan_for_trainers() -> list[TrainerInfo]:
     ]
 
 
-async def detect_trainer(config_handler: "AppConfig", config_path: Path) -> TrainerInfo:
+async def detect_trainer(config_handler: "bootstrap.AppConfig", config_path: Path) -> TrainerInfo:
     """Detect and persist trainer selection.
 
     Scans for BLE trainers and handles selection. If exactly one trainer is
@@ -84,8 +84,9 @@ async def detect_trainer(config_handler: "AppConfig", config_path: Path) -> Trai
     # Load existing config or create new one
     try:
         config = config_handler.load_file(config_path)
-    except errors.ConfigError:
-        config = Config()
+    except FileNotFoundError:
+        # File doesn't exist, create new config with default FTP
+        config = cfg.Config(ftp=300)
 
     # Update device address and save
     trainer = trainers[0]
