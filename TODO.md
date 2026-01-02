@@ -20,14 +20,22 @@ Basic BLE scanning for trainers with Cycling Power Service is implemented. Curre
 ### TODO Persist selected trainer to config
 After trainer selection, save it to config file using AppConfig.write_file() for use in future runs. This also requires adding a parameter to the latter method in order to pass the Config to write.
 
+### TODO Implement user configuration UI
+If the FTP is not configured, ask the user to enter a value. Store it in the configuration and continue.
+
+The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).
+
 ### TODO Implement user selection UI for trainer detection
-When multiple trainers are found, allow the user to select one using a simple menu. For single trainer, offer (c)ontinue/(r)etry/(d)emo/(e)xit options. For multiple trainers, show numbered list with selection. The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).
+If a trainer is configured, and can be reached, continue without any interactions. If it cannot be reached, offer to retry, exit or continue in demo mode.
 
-### TODO Implement PowerMeter implementations
+The generalized menu should look like this: (c)ontinue  (r)etry  (d)emo  (e)xit
+
+If, on the other hand, no trainers are configured, scan for trainers. When no trainers are found, offer demo mode, exit or retry. If one is found, show it and offer to continue. When multiple trainers are found, allow the user to select one by entering the number corresponding to the list of trainers. Once one is selected, continue as if one was found.
+
+The trainer selection should happen after the user setup, if applicable. The resulting configuration from the two steps should be stored in the same operation.
+
+### TODO Implement PowerMeter using Bleak
 Create BleakPowerMeter (real trainer using pycycling) and DemoPowerMeter (synthetic data for testing) that implement the PowerMeter protocol.
-
-### TODO Check config before scanning
-Check config.device_address and attempt connection to stored trainer before running BLE scan. Only scan if no device configured or connection fails.
 
 ### TODO Error handling for async queue
 Error should be put on the queue and handled by the sink.
