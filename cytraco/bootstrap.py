@@ -11,6 +11,25 @@ from typing import Protocol
 from cytraco.model.config import Config
 
 
+class SetupUI(Protocol):
+    """Protocol for setup user interface.
+
+    Classes implementing this protocol can prompt users for
+    configuration values during initial setup.
+    """
+
+    def prompt_ftp(self) -> int:
+        """Prompt user for FTP in watts.
+
+        Returns:
+            FTP value entered by user (positive integer).
+
+        Raises:
+            ConfigError: If user exits or input fails.
+        """
+        ...
+
+
 class AppConfig(Protocol):
     """Protocol for configuration management.
 
@@ -65,3 +84,39 @@ class AppRunner(Protocol):
                 a fatal error during execution.
         """
         ...
+
+
+def bootstrap_app(
+    config_path: Path,
+    config_handler: AppConfig,
+    setup_ui: SetupUI,
+) -> Config:
+    """Bootstrap Cytraco: ensure config exists, prompting user if needed.
+
+    Loads existing configuration or prompts user for required values
+    (like FTP) if config doesn't exist. Saves the configuration to disk.
+
+    Args:
+        config_path: Path to configuration file.
+        config_handler: AppConfig implementation for loading/saving config.
+        setup_ui: SetupUI implementation for prompting user.
+
+    Returns:
+        Complete configuration.
+
+    Raises:
+        ConfigError: If setup fails or user exits.
+    """
+    try:
+        return config_handler.load_file(config_path)
+    except FileNotFoundError:
+        pass
+
+    # Prompt for FTP
+    ftp_value = setup_ui.prompt_ftp()
+
+    # Create and save config
+    config = Config(ftp=ftp_value)
+    config_handler.write_file(config_path, config)
+
+    return config

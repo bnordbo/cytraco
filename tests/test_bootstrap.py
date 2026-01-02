@@ -2,7 +2,9 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
+from cytraco import bootstrap
 from cytraco.model.config import Config
 from tests import generators as generate
 
@@ -58,3 +60,53 @@ def test_runnable_protocol_start() -> None:
     runnable: AppRunner = MockRunnable()
     runnable.start()
     assert runnable.started
+
+
+def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
+    """bootstrap_app should return existing config without prompting."""
+    config_path = tmp_path / "config.toml"
+    existing_config = generate.config()
+
+    mock_config_handler = MagicMock()
+    mock_config_handler.load_file.return_value = existing_config
+
+    mock_setup_ui = MagicMock()
+
+    result = bootstrap.bootstrap_app(
+        config_path,
+        mock_config_handler,
+        mock_setup_ui,
+    )
+
+    assert result == existing_config
+    mock_config_handler.load_file.assert_called_once_with(config_path)
+    mock_setup_ui.prompt_ftp.assert_not_called()
+    mock_config_handler.write_file.assert_not_called()
+
+
+def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
+    """bootstrap_app should prompt and save when config doesn't exist."""
+    config_path = tmp_path / "config.toml"
+    test_ftp = generate.ftp()
+
+    mock_config_handler = MagicMock()
+    mock_config_handler.load_file.side_effect = FileNotFoundError()
+
+    mock_setup_ui = MagicMock()
+    mock_setup_ui.prompt_ftp.return_value = test_ftp
+
+    result = bootstrap.bootstrap_app(
+        config_path,
+        mock_config_handler,
+        mock_setup_ui,
+    )
+
+    assert result.ftp == test_ftp
+    assert result.device_address is None
+    mock_setup_ui.prompt_ftp.assert_called_once()
+    mock_config_handler.write_file.assert_called_once()
+
+    # Verify the config written
+    call_args = mock_config_handler.write_file.call_args
+    assert call_args[0][0] == config_path
+    assert call_args[0][1].ftp == test_ftp
