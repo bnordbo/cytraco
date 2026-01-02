@@ -14,11 +14,23 @@ This should provide power updates from a trainer (or some other source, like a p
 ### DONE Add an exception hierarchy
 I think there should be a root exception, perhaps in `cytraco.errors`, e.g. `CytracoError`, and replace uses of `RuntimeError` with more implementaitons of more appropriate exceptions like `PowerMeterError` that wraps the underlying exception, if applicable. All relevant exception code and documentation should be updated accordingly. 
 
+### DONE Use the pycycle library to detect a trainer
+Basic BLE scanning for trainers with Cycling Power Service is implemented. Currently exits with error if not exactly one trainer found. Future enhancements below.
+
+### TODO Persist selected trainer to config
+After trainer selection, save it to config file using AppConfig.write_file() for use in future runs. This also requires adding a parameter to the latter method in order to pass the Config to write.
+
+### TODO Implement user selection UI for trainer detection
+When multiple trainers are found, allow the user to select one using a simple menu. For single trainer, offer (c)ontinue/(r)etry/(d)emo/(e)xit options. For multiple trainers, show numbered list with selection. The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).
+
+### TODO Implement PowerMeter implementations
+Create BleakPowerMeter (real trainer using pycycling) and DemoPowerMeter (synthetic data for testing) that implement the PowerMeter protocol.
+
+### TODO Check config before scanning
+Check config.device_address and attempt connection to stored trainer before running BLE scan. Only scan if no device configured or connection fails.
+
 ### TODO Error handling for async queue
 Error should be put on the queue and handled by the sink.
-
-### TODO Use the pycycle library to detect a trainer
-Detect available trainers, and allow the user to select one using a simple menu. There will usually only be one, so prompt e.g. "Use Wahoo Kickr Core <mac address> (y/n)". If there are multiple, allow selecting one by listing them with a number and have the user enter a number. Exit with an error code if the wrong number is enter, or if no trainers are available.
 
 ## Old tasks
 
