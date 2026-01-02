@@ -38,6 +38,7 @@ layers = [
 
 [tool.ruff]
 line-length=100
+exclude = [".vulture_whitelist.py"]
 
 [tool.ruff.lint]
 extend-select = [
