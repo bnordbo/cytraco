@@ -37,9 +37,9 @@ def test_exception_wrapping() -> None:
     """Exceptions should support wrapping with __cause__."""
     original = ValueError("original error")
 
-    try:
+    with pytest.raises(PowerMeterError) as exc_info:
         raise PowerMeterError("wrapped error") from original
-    except PowerMeterError as e:
-        assert str(e) == "wrapped error"
-        assert e.__cause__ is original
-        assert isinstance(e.__cause__, ValueError)
+
+    assert str(exc_info.value) == "wrapped error"
+    assert exc_info.value.__cause__ is original
+    assert isinstance(exc_info.value.__cause__, ValueError)

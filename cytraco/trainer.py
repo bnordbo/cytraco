@@ -7,7 +7,6 @@ import bleak
 
 from cytraco import errors
 
-
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
 
@@ -26,11 +25,11 @@ class TrainerInfo:
     rssi: int
 
 
-async def scan_for_trainers(timeout: float = 5.0) -> list[TrainerInfo]:
+async def scan_for_trainers() -> list[TrainerInfo]:
     """Scan for BLE trainers with FTMS.
 
-    Args:
-        timeout: Scan duration in seconds
+    Scans for 10 seconds. Callers needing different timeout behavior
+    should wrap with asyncio.timeout().
 
     Returns:
         List of discovered trainers with FTMS
@@ -40,7 +39,7 @@ async def scan_for_trainers(timeout: float = 5.0) -> list[TrainerInfo]:
     """
     try:
         devices = await bleak.BleakScanner.discover(
-            timeout=timeout,
+            timeout=10.0,
             service_uuids=[FTMS_SERVICE_UUID],
             return_adv=True,
         )

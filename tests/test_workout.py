@@ -1,18 +1,22 @@
 """Tests for workout protocols."""
 
 import asyncio
+from typing import TYPE_CHECKING
 
 import pytest
 
 from cytraco.model.power import PowerData
-from cytraco.workout import PowerMeter
 from tests import generators as generate
+
+if TYPE_CHECKING:
+    from cytraco.workout import PowerMeter
 
 
 class MockPowerMeter:
     """Mock implementation of PowerMeter for testing."""
 
     def __init__(self) -> None:
+        """Initialize mock with empty queue."""
         self._queue: asyncio.Queue[PowerData] = asyncio.Queue()
         self._running = False
 

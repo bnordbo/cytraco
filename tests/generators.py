@@ -27,7 +27,7 @@ def trainer_info() -> TrainerInfo:
     """Generate random TrainerInfo for testing."""
     names = ["Tacx Neo 2T", "Wahoo KICKR", "Elite Direto", "Saris H3"]
     return TrainerInfo(
-        name=random.choice(names), address=mac_address(), rssi=random.randint(-90, -30)
+        name=random.choice(names), address=mac_address(), rssi=random.randint(-90, -30),
     )
 
 

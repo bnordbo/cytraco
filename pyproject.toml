@@ -53,7 +53,6 @@ select = [
     "C90",
     "D",
     "E",
-    "EM",
     "ERA",
     "EXE",
     "F",
@@ -97,6 +96,7 @@ ignore = [
     "D213",
     "D413",
     "S101",
+    "TRY003",  # raise-vanilla-args
 ]
 
 [tool.vulture]

@@ -37,12 +37,12 @@ async def test_scan_for_trainers_finds_trainers(monkeypatch: pytest.MonkeyPatch)
 
 
 @pytest.mark.asyncio
-async def test_scan_for_trainers_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Scanner should pass timeout parameter to discover."""
+async def test_scan_for_trainers_calls_discover(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Scanner should call BleakScanner.discover."""
     mock_discover = AsyncMock(return_value={})
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    await scan_for_trainers(timeout=10.0)
+    await scan_for_trainers()
 
     mock_discover.assert_called_once()
 

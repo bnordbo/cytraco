@@ -1,32 +1,35 @@
 """Tests for bootstrap protocols."""
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from cytraco.bootstrap import AppConfig, AppRunner
 from cytraco.model.config import Config
 from tests import generators as generate
+
+if TYPE_CHECKING:
+    from cytraco.bootstrap import AppConfig, AppRunner
 
 
 class MockConfigurable:
     """Mock implementation of Configurable for testing."""
 
     def __init__(self) -> None:
+        """Initialize mock with empty config."""
         self._config = Config()
 
-    # ruff: disable[ARG002]
-    def load_file(self, path: Path) -> Config:
+    def load_file(self, _path: Path) -> Config:
         """Mock load_file implementation."""
         return Config(device_address=generate.mac_address(), ftp=generate.ftp())
 
-    def write_file(self, path: Path) -> None:
+    def write_file(self, _path: Path) -> None:
         """Mock write_file implementation."""
-        pass
 
 
 class MockRunnable:
     """Mock implementation of Runnable for testing."""
 
     def __init__(self) -> None:
+        """Initialize mock in non-started state."""
         self.started = False
 
     def start(self) -> None:

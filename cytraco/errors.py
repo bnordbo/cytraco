@@ -9,7 +9,6 @@ class CytracoError(Exception):
     except clause.
     """
 
-    pass
 
 
 class PowerMeterError(CytracoError):
@@ -19,7 +18,6 @@ class PowerMeterError(CytracoError):
     device unavailability, or monitoring failures.
     """
 
-    pass
 
 
 class AppRunnerError(CytracoError):
@@ -29,7 +27,6 @@ class AppRunnerError(CytracoError):
     a fatal error during execution.
     """
 
-    pass
 
 
 class DeviceError(CytracoError):
@@ -38,4 +35,3 @@ class DeviceError(CytracoError):
     Raised when a BLE operation on a device fails..
     """
 
-    pass
