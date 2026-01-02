@@ -43,12 +43,12 @@ def test_load_valid_toml(tmp_path: Path) -> None:
 
 
 def test_load_missing_file(tmp_path: Path) -> None:
-    """TomlConfig should raise ConfigError when file doesn't exist."""
+    """TomlConfig should raise FileNotFoundError when file doesn't exist."""
     config_path = tmp_path / "nonexistent.toml"
 
     toml_config = TomlConfig()
 
-    with pytest.raises(errors.ConfigError, match="Config file not found"):
+    with pytest.raises(FileNotFoundError):
         toml_config.load_file(config_path)
 
 

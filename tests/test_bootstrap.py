@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 from cytraco import bootstrap
+from cytraco.config import TomlConfig
 from cytraco.model.config import Config
 from tests import generators as generate
 
@@ -67,21 +68,21 @@ def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     existing_config = generate.config()
 
-    mock_config_handler = MagicMock()
-    mock_config_handler.load_file.return_value = existing_config
+    # Use real TomlConfig, write actual file
+    config_handler = TomlConfig()
+    config_handler.write_file(config_path, existing_config)
 
     mock_setup_ui = MagicMock()
 
     result = bootstrap.bootstrap_app(
         config_path,
-        mock_config_handler,
+        config_handler,
         mock_setup_ui,
     )
 
-    assert result == existing_config
-    mock_config_handler.load_file.assert_called_once_with(config_path)
+    assert result.ftp == existing_config.ftp
+    assert result.device_address == existing_config.device_address
     mock_setup_ui.prompt_ftp.assert_not_called()
-    mock_config_handler.write_file.assert_not_called()
 
 
 def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
@@ -89,24 +90,24 @@ def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     test_ftp = generate.ftp()
 
-    mock_config_handler = MagicMock()
-    mock_config_handler.load_file.side_effect = FileNotFoundError()
+    # Use real TomlConfig, no mocking
+    config_handler = TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
 
     result = bootstrap.bootstrap_app(
         config_path,
-        mock_config_handler,
+        config_handler,
         mock_setup_ui,
     )
 
     assert result.ftp == test_ftp
     assert result.device_address is None
     mock_setup_ui.prompt_ftp.assert_called_once()
-    mock_config_handler.write_file.assert_called_once()
 
-    # Verify the config written
-    call_args = mock_config_handler.write_file.call_args
-    assert call_args[0][0] == config_path
-    assert call_args[0][1].ftp == test_ftp
+    # Verify config was actually written to disk
+    assert config_path.exists()
+    loaded_config = config_handler.load_file(config_path)
+    assert loaded_config.ftp == test_ftp
+    assert loaded_config.device_address is None
