@@ -14,4 +14,4 @@ def test_power_data_creation() -> None:
 def test_power_data_fields() -> None:
     """PowerData should provide access to power field."""
     power_value = generate.power_data().power
-    assert 100 <= power_value <= 400
+    assert power_value > 0

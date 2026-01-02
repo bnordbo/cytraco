@@ -41,7 +41,8 @@ line-length=100
 exclude = [".vulture_whitelist.py"]
 
 [tool.ruff.lint]
-extend-select = [
+# Rules as of Ruff 0.14.10, 2026-01-02
+select = [
     "ARG",
     "ANN",
     "ASYNC",
@@ -51,7 +52,6 @@ extend-select = [
     "C4",
     "C90",
     "D",
-    "DOC",
     "E",
     "EM",
     "ERA",
@@ -93,6 +93,9 @@ extend-select = [
     "W",
 ]
 ignore = [
+    "D203",
+    "D213",
+    "D413",
     "S101",
 ]
 

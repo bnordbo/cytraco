@@ -1,5 +1,7 @@
 """Test data generators."""
 
+# ruff: noqa: S311
+
 import random
 
 from cytraco.model.power import PowerData

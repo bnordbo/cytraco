@@ -13,6 +13,7 @@ class MockConfigurable:
     def __init__(self) -> None:
         self._config = Config()
 
+    # ruff: disable[ARG002]
     def load_file(self, path: Path) -> Config:
         """Mock load_file implementation."""
         return Config(device_address=generate.mac_address(), ftp=generate.ftp())
