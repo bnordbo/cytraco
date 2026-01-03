@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-from cytraco import bootstrap
+from cytraco.bootstrap import bootstrap_app
 from cytraco.config import TomlConfig
 from cytraco.model.config import Config
 from tests import generators as generate
@@ -73,12 +73,7 @@ def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
     config_handler.write_file(config_path, existing_config)
 
     mock_setup_ui = MagicMock()
-
-    result = bootstrap.bootstrap_app(
-        config_path,
-        config_handler,
-        mock_setup_ui,
-    )
+    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result.ftp == existing_config.ftp
     assert result.device_address == existing_config.device_address
@@ -95,12 +90,7 @@ def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-
-    result = bootstrap.bootstrap_app(
-        config_path,
-        config_handler,
-        mock_setup_ui,
-    )
+    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is not None
     assert result.ftp == test_ftp
@@ -117,12 +107,7 @@ def test_bootstrap_app_user_exits(tmp_path: Path) -> None:
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = None
-
-    result = bootstrap.bootstrap_app(
-        config_path,
-        config_handler,
-        mock_setup_ui,
-    )
+    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is None
     mock_setup_ui.prompt_ftp.assert_called_once()
