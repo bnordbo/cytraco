@@ -7,12 +7,7 @@ class TerminalSetup:
     """Terminal-based setup UI using stdin/stdout."""
 
     def prompt_ftp(self) -> int:
-        """Prompt user for FTP in watts.
-
-        Validates that input is:
-        - A valid integer
-        - Positive (> 0)
-        - Allows "(e)exit" or "e" to exit
+        """Prompt user for FTP in watts, validating positive integer input.
 
         Returns:
             FTP value in watts (positive integer).
@@ -22,20 +17,17 @@ class TerminalSetup:
         """
         print("\nFTP (Functional Threshold Power) not configured.")
         print("Please enter your FTP in watts (positive integer):")
-        print('Type "(e)exit" or "e" to exit.')
+        print('Type "(e)xit" to exit.')
 
         while True:
             try:
                 value = input("> ").strip()
 
-                # Check for exit commands
-                if value.lower() in ("e", "exit", "(e)exit"):
+                if value.lower() == "e":
                     raise errors.ConfigError("Setup cancelled by user")
 
-                # Try to parse as integer
                 ftp_value = int(value)
 
-                # Validate positive
                 if ftp_value > 0:
                     return ftp_value
 

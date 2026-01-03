@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from cytraco import bootstrap, errors
-from cytraco.config import TomlConfig
-from cytraco.ui.setup import TerminalSetup
+from cytraco import bootstrap, config, errors, ui
 
 
 def app() -> None:
@@ -16,19 +14,16 @@ def app() -> None:
     """
     config_path = Path.home() / ".config" / "cytraco" / "config.toml"
 
-    config_handler = TomlConfig()
-    setup_ui = TerminalSetup()
+    config_handler = config.TomlConfig()
+    setup_ui = ui.setup.TerminalSetup()
 
     try:
-        config = bootstrap.bootstrap_app(
+        cfg = bootstrap.bootstrap_app(
             config_path,
             config_handler,
             setup_ui,
         )
-        print(f"\nConfiguration loaded. FTP: {config.ftp}W")
-
-        # TODO: Detect trainer (next TODO - trainer selection UI)
-        # TODO: Start workout (when workout module is ready)
+        print(f"\nConfiguration loaded. FTP: {cfg.ftp}W")
         print("Setup complete! (Trainer detection and workout not yet implemented)")
 
     except errors.ConfigError as e:

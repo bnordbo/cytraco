@@ -85,7 +85,6 @@ async def detect_trainer(config_handler: "bootstrap.AppConfig", config_path: Pat
     try:
         config = config_handler.load_file(config_path)
     except FileNotFoundError:
-        # File doesn't exist, create new config with default FTP
         config = cfg.Config(ftp=300)
 
     # Update device address and save

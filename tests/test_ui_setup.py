@@ -67,24 +67,6 @@ def test_prompt_ftp_exit_with_e(monkeypatch: pytest.MonkeyPatch) -> None:
         setup.prompt_ftp()
 
 
-def test_prompt_ftp_exit_with_exit(monkeypatch: pytest.MonkeyPatch) -> None:
-    """TerminalSetup should raise ConfigError when user types 'exit'."""
-    monkeypatch.setattr("builtins.input", lambda _: "exit")
-
-    setup = TerminalSetup()
-
-    with pytest.raises(errors.ConfigError, match="cancelled by user"):
-        setup.prompt_ftp()
-
-
-def test_prompt_ftp_exit_with_parentheses(monkeypatch: pytest.MonkeyPatch) -> None:
-    """TerminalSetup should raise ConfigError when user types '(e)exit'."""
-    monkeypatch.setattr("builtins.input", lambda _: "(e)exit")
-
-    setup = TerminalSetup()
-
-    with pytest.raises(errors.ConfigError, match="cancelled by user"):
-        setup.prompt_ftp()
 
 
 def test_prompt_ftp_keyboard_interrupt(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -112,10 +112,7 @@ def bootstrap_app(
     except FileNotFoundError:
         pass
 
-    # Prompt for FTP
     ftp_value = setup_ui.prompt_ftp()
-
-    # Create and save config
     config = Config(ftp=ftp_value)
     config_handler.write_file(config_path, config)
 
