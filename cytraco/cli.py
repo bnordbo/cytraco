@@ -3,7 +3,8 @@
 import sys
 from pathlib import Path
 
-from cytraco import bootstrap, config, errors, ui
+from cytraco import bootstrap, config, errors
+from cytraco.ui import setup
 
 
 def app() -> None:
@@ -15,7 +16,7 @@ def app() -> None:
     config_path = Path.home() / ".config" / "cytraco" / "config.toml"
 
     config_handler = config.TomlConfig()
-    setup_ui = ui.setup.TerminalSetup()
+    setup_ui = setup.TerminalSetup()
 
     try:
         cfg = bootstrap.bootstrap_app(
