@@ -1,4 +1,4 @@
-"""Configuration file operations."""
+"""Configuration file operations. Alias: cfg"""
 
 import tomllib
 from pathlib import Path

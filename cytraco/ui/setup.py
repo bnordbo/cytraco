@@ -1,4 +1,4 @@
-"""UI for initial setup and configuration."""
+"""UI for initial setup and configuration. Alias: sup"""
 
 
 

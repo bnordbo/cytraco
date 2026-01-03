@@ -1,4 +1,4 @@
-"""Trainer detection and BLE scanning."""
+"""Trainer detection and BLE scanning. Alias: trn"""
 
 from dataclasses import dataclass
 from pathlib import Path

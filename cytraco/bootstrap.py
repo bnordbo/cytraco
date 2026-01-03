@@ -1,4 +1,4 @@
-"""Bootstrap protocols for application lifecycle and configuration.
+"""Bootstrap protocols for application lifecycle and configuration. Alias: bts
 
 This module defines protocols for the bootstrap use-case layer. These protocols
 are implemented by higher layers following the dependency inversion principle.
