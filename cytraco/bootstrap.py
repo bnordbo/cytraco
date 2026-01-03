@@ -101,10 +101,8 @@ def bootstrap_app(
     Returns:
         Complete configuration, or None if user exits during setup.
     """
-    try:
+    if config_path.exists():
         return config_handler.load_file(config_path)
-    except FileNotFoundError:
-        pass
 
     ftp_value = setup_ui.prompt_ftp()
     if ftp_value is None:
