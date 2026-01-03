@@ -17,7 +17,7 @@ I think there should be a root exception, perhaps in `cytraco.errors`, e.g. `Cyt
 ### DONE Use the pycycle library to detect a trainer
 Basic BLE scanning for trainers with Cycling Power Service is implemented. Currently exits with error if not exactly one trainer found. Future enhancements below.
 
-### TODO Persist selected trainer to config
+### DONE Persist selected trainer to config
 After trainer selection, save it to config file using AppConfig.write_file() for use in future runs. This also requires adding a parameter to the latter method in order to pass the Config to write.
 
 ### TODO Implement user configuration UI

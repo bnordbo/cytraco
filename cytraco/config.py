@@ -1,4 +1,4 @@
-"""Configuration file operations."""
+"""Configuration file operations. Alias: cfg"""
 
 import tomllib
 from pathlib import Path
@@ -22,7 +22,8 @@ class TomlConfig:
             Config object populated with values from the file.
 
         Raises:
-            ConfigError: If the file doesn't exist, is malformed, or cannot be read.
+            FileNotFoundError: If the configuration file doesn't exist.
+            ConfigError: If the file is malformed or cannot be read.
         """
         try:
             with path.open("rb") as f:
@@ -31,12 +32,10 @@ class TomlConfig:
                 ftp=data["ftp"],
                 device_address=data.get("device_address"),
             )
-        except FileNotFoundError as e:
-            raise errors.ConfigError(f"Config file not found: {path}") from e
         except tomllib.TOMLDecodeError as e:
             raise errors.ConfigError(f"Invalid TOML in {path}: {e}") from e
-        except Exception as e:
-            raise errors.ConfigError(f"Failed to load config: {e}") from e
+        except (KeyError, TypeError) as e:
+            raise errors.ConfigError(f"Invalid config structure in {path}: {e}") from e
 
     def write_file(self, path: Path, config: cfg.Config) -> None:
         """Write configuration to TOML file.

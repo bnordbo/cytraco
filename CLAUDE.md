@@ -50,7 +50,8 @@ vulture
 - Don't write old school code, i.e. use `Path` instead of `str`.
 - Don't add separate tests for checking type annotations.
 - Don't use Java-style getters. Use property annotations instead.
-
+- Don't use literals in test code. Use generators instead.
+- Don't import names from modules except if they are frequently used.
 
 ## Host utilities
-- Ripgrep (`rg`)
+- Ripgrep (`rg`) is available. Use it instead of `grep`.

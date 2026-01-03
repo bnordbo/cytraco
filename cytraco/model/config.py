@@ -1,4 +1,4 @@
-"""Configuration model for Cytraco."""
+"""Configuration model for Cytraco. Alias: cfg"""
 
 from dataclasses import dataclass
 

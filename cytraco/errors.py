@@ -1,4 +1,4 @@
-"""Exception hierarchy for Cytraco."""
+"""Exception hierarchy for Cytraco. Alias: err"""
 
 
 class CytracoError(Exception):
