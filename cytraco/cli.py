@@ -3,8 +3,10 @@
 import sys
 from pathlib import Path
 
-from cytraco import bootstrap, config, errors
-from cytraco.ui import setup
+import cytraco.bootstrap as bts
+import cytraco.config as cfg
+import cytraco.ui.setup as sup
+from cytraco import errors
 
 
 def app() -> None:
@@ -15,20 +17,20 @@ def app() -> None:
     """
     config_path = Path.home() / ".config" / "cytraco" / "config.toml"
 
-    config_handler = config.TomlConfig()
-    setup_ui = setup.TerminalSetup()
+    config_handler = cfg.TomlConfig()
+    setup_ui = sup.TerminalSetup()
 
     try:
-        cfg = bootstrap.bootstrap_app(
+        config = bts.bootstrap_app(
             config_path,
             config_handler,
             setup_ui,
         )
-        if cfg is None:
+        if config is None:
             print("\nSetup cancelled by user")
             sys.exit(0)
 
-        print(f"\nConfiguration loaded. FTP: {cfg.ftp}W")
+        print(f"\nConfiguration loaded. FTP: {config.ftp}W")
         print("Setup complete! (Trainer detection and workout not yet implemented)")
 
     except errors.ConfigError as e:

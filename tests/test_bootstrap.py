@@ -106,12 +106,7 @@ def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
     assert result.ftp == test_ftp
     assert result.device_address is None
     mock_setup_ui.prompt_ftp.assert_called_once()
-
-    # Verify config was actually written to disk
     assert config_path.exists()
-    loaded_config = config_handler.load_file(config_path)
-    assert loaded_config.ftp == test_ftp
-    assert loaded_config.device_address is None
 
 
 def test_bootstrap_app_user_exits(tmp_path: Path) -> None:

@@ -10,10 +10,8 @@ def test_prompt_ftp_valid_input(monkeypatch: pytest.MonkeyPatch) -> None:
     """TerminalSetup should return FTP when valid input provided."""
     test_ftp = generate.ftp()
     monkeypatch.setattr("builtins.input", lambda _: str(test_ftp))
-
     setup = TerminalSetup()
     result = setup.prompt_ftp()
-
     assert result == test_ftp
 
 

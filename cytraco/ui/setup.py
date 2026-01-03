@@ -1,7 +1,6 @@
 """UI for initial setup and configuration. Alias: sup"""
 
 
-
 class TerminalSetup:
     """Terminal-based setup UI using stdin/stdout."""
 
@@ -18,17 +17,12 @@ class TerminalSetup:
         while True:
             try:
                 value = input("> ").strip()
-
                 if value.lower() == "e":
                     return None
-
                 ftp_value = int(value)
-
                 if ftp_value > 0:
                     return ftp_value
-
                 print("FTP must be a positive number. Try again.")
-
             except ValueError:
                 print("Invalid input. Please enter a positive integer.")
             except (KeyboardInterrupt, EOFError):
