@@ -20,7 +20,7 @@ Basic BLE scanning for trainers with Cycling Power Service is implemented. Curre
 ### DONE Persist selected trainer to config
 After trainer selection, save it to config file using AppConfig.write_file() for use in future runs. This also requires adding a parameter to the latter method in order to pass the Config to write.
 
-### TODO Implement user configuration UI
+### DONE Implement user configuration UI
 If the FTP is not configured, ask the user to enter a value. Store it in the configuration and continue.
 
 The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).

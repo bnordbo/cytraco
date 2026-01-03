@@ -45,6 +45,9 @@ coverage report
 vulture
 ```
 
+## Pull requests
+- Never edit comments. Respond instead. 
+
 ## Common mistakes
 - Don't create test generators for maps and lists.
 - Don't write old school code, i.e. use `Path` instead of `str`.

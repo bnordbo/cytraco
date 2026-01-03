@@ -21,11 +21,7 @@ def app() -> None:
     setup_ui = sup.TerminalSetup()
 
     try:
-        config = bts.bootstrap_app(
-            config_path,
-            config_handler,
-            setup_ui,
-        )
+        config = bts.bootstrap_app(config_path, config_handler, setup_ui)
         if config is None:
             print("\nSetup cancelled by user")
             sys.exit(0)

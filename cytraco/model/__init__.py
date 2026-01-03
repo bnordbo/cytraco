@@ -1,1 +1,1 @@
-"""Data models for Cytraco. Alias: mod"""
+"""Data models for Cytraco. Alias: mod."""

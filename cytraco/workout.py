@@ -1,4 +1,4 @@
-"""Workout protocols for power monitoring and training. Alias: wrk"""
+"""Workout protocols for power monitoring and training. Alias: wrk."""
 
 import asyncio
 from typing import Protocol

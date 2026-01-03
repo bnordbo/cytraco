@@ -1,4 +1,4 @@
-"""Power measurement model for Cytraco. Alias: pow"""
+"""Power measurement model for Cytraco. Alias: pow."""
 
 from dataclasses import dataclass
 

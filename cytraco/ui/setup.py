@@ -1,4 +1,4 @@
-"""UI for initial setup and configuration. Alias: sup"""
+"""UI for initial setup and configuration. Alias: sup."""
 
 
 class TerminalSetup:
