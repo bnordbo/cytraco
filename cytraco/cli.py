@@ -23,6 +23,10 @@ def app() -> None:
             config_handler,
             setup_ui,
         )
+        if cfg is None:
+            print("\nSetup cancelled by user")
+            sys.exit(0)
+
         print(f"\nConfiguration loaded. FTP: {cfg.ftp}W")
         print("Setup complete! (Trainer detection and workout not yet implemented)")
 

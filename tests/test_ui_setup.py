@@ -2,7 +2,6 @@
 
 import pytest
 
-from cytraco import errors
 from cytraco.ui.setup import TerminalSetup
 from tests import generators as generate
 
@@ -58,19 +57,19 @@ def test_prompt_ftp_non_numeric_then_valid(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_prompt_ftp_exit_with_e(monkeypatch: pytest.MonkeyPatch) -> None:
-    """TerminalSetup should raise ConfigError when user types 'e'."""
+    """TerminalSetup should return None when user types 'e'."""
     monkeypatch.setattr("builtins.input", lambda _: "e")
 
     setup = TerminalSetup()
+    result = setup.prompt_ftp()
 
-    with pytest.raises(errors.ConfigError, match="cancelled by user"):
-        setup.prompt_ftp()
+    assert result is None
 
 
 
 
 def test_prompt_ftp_keyboard_interrupt(monkeypatch: pytest.MonkeyPatch) -> None:
-    """TerminalSetup should raise ConfigError on keyboard interrupt."""
+    """TerminalSetup should return None on keyboard interrupt."""
 
     def raise_interrupt(_: str) -> str:
         raise KeyboardInterrupt
@@ -78,13 +77,13 @@ def test_prompt_ftp_keyboard_interrupt(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("builtins.input", raise_interrupt)
 
     setup = TerminalSetup()
+    result = setup.prompt_ftp()
 
-    with pytest.raises(errors.ConfigError, match="cancelled by user"):
-        setup.prompt_ftp()
+    assert result is None
 
 
 def test_prompt_ftp_eof_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    """TerminalSetup should raise ConfigError on EOF."""
+    """TerminalSetup should return None on EOF."""
 
     def raise_eof(_: str) -> str:
         raise EOFError
@@ -92,6 +91,6 @@ def test_prompt_ftp_eof_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("builtins.input", raise_eof)
 
     setup = TerminalSetup()
+    result = setup.prompt_ftp()
 
-    with pytest.raises(errors.ConfigError, match="cancelled by user"):
-        setup.prompt_ftp()
+    assert result is None

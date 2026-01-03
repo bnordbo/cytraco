@@ -1,19 +1,15 @@
 """UI for initial setup and configuration."""
 
-from cytraco import errors
 
 
 class TerminalSetup:
     """Terminal-based setup UI using stdin/stdout."""
 
-    def prompt_ftp(self) -> int:
+    def prompt_ftp(self) -> int | None:
         """Prompt user for FTP in watts, validating positive integer input.
 
         Returns:
-            FTP value in watts (positive integer).
-
-        Raises:
-            ConfigError: If user exits via "(e)exit", "e", or Ctrl-C.
+            FTP value in watts (positive integer), or None if user exits.
         """
         print("\nFTP (Functional Threshold Power) not configured.")
         print("Please enter your FTP in watts (positive integer):")
@@ -24,7 +20,7 @@ class TerminalSetup:
                 value = input("> ").strip()
 
                 if value.lower() == "e":
-                    raise errors.ConfigError("Setup cancelled by user")
+                    return None
 
                 ftp_value = int(value)
 
@@ -35,5 +31,5 @@ class TerminalSetup:
 
             except ValueError:
                 print("Invalid input. Please enter a positive integer.")
-            except (KeyboardInterrupt, EOFError) as e:
-                raise errors.ConfigError("Setup cancelled by user") from e
+            except (KeyboardInterrupt, EOFError):
+                return None

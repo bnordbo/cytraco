@@ -102,6 +102,7 @@ def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
         mock_setup_ui,
     )
 
+    assert result is not None
     assert result.ftp == test_ftp
     assert result.device_address is None
     mock_setup_ui.prompt_ftp.assert_called_once()
@@ -111,3 +112,25 @@ def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
     loaded_config = config_handler.load_file(config_path)
     assert loaded_config.ftp == test_ftp
     assert loaded_config.device_address is None
+
+
+def test_bootstrap_app_user_exits(tmp_path: Path) -> None:
+    """bootstrap_app should return None when user exits during setup."""
+    config_path = tmp_path / "config.toml"
+
+    config_handler = TomlConfig()
+
+    mock_setup_ui = MagicMock()
+    mock_setup_ui.prompt_ftp.return_value = None
+
+    result = bootstrap.bootstrap_app(
+        config_path,
+        config_handler,
+        mock_setup_ui,
+    )
+
+    assert result is None
+    mock_setup_ui.prompt_ftp.assert_called_once()
+
+    # Verify no config was written
+    assert not config_path.exists()

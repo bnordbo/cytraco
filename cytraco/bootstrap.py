@@ -18,14 +18,11 @@ class SetupUI(Protocol):
     configuration values during initial setup.
     """
 
-    def prompt_ftp(self) -> int:
+    def prompt_ftp(self) -> int | None:
         """Prompt user for FTP in watts.
 
         Returns:
-            FTP value entered by user (positive integer).
-
-        Raises:
-            ConfigError: If user exits or input fails.
+            FTP value entered by user (positive integer), or None if user exits.
         """
         ...
 
@@ -90,7 +87,7 @@ def bootstrap_app(
     config_path: Path,
     config_handler: AppConfig,
     setup_ui: SetupUI,
-) -> Config:
+) -> Config | None:
     """Bootstrap Cytraco: ensure config exists, prompting user if needed.
 
     Loads existing configuration or prompts user for required values
@@ -102,10 +99,7 @@ def bootstrap_app(
         setup_ui: SetupUI implementation for prompting user.
 
     Returns:
-        Complete configuration.
-
-    Raises:
-        ConfigError: If setup fails or user exits.
+        Complete configuration, or None if user exits during setup.
     """
     try:
         return config_handler.load_file(config_path)
@@ -113,6 +107,9 @@ def bootstrap_app(
         pass
 
     ftp_value = setup_ui.prompt_ftp()
+    if ftp_value is None:
+        return None
+
     config = Config(ftp=ftp_value)
     config_handler.write_file(config_path, config)
 
