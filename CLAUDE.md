@@ -22,8 +22,9 @@ Additionally:
 - Don't use unnecessary courtesies. 
 - Use neutral, descriptive language. Replace subjective qualifiers (good/bad/great/poor) with specific, observable characteristics or measurable properties.
 
-## Commits
+## Commits and tasks
 - Never start a plan on a dirty repo. Changes must be committed first.
+- Never alter existing TODO items except by completing them.
 
 ## Commands
 

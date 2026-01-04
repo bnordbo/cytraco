@@ -1,7 +1,9 @@
 """Tests for bootstrap protocols."""
 
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from cytraco.bootstrap import AppConfig, AppRunner, bootstrap_app
 from cytraco.config import TomlConfig
@@ -59,17 +61,29 @@ def test_runnable_protocol_start() -> None:
     assert runnable.started
 
 
-def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
-    """bootstrap_app should return existing config without prompting."""
+@pytest.mark.asyncio
+async def test_bootstrap_app_existing_config(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """bootstrap_app should return existing config with trainer selection."""
     config_path = tmp_path / "config.toml"
     existing_config = generate.config()
+    trainer = generate.trainer_info()
+    trainer.address = existing_config.device_address
 
     # Use real TomlConfig, write actual file
     config_handler = TomlConfig()
     config_handler.write_file(config_path, existing_config)
 
+    # Mock trainer functions
+    mock_check_connection = AsyncMock(return_value=True)
+    mock_scan = AsyncMock(return_value=[trainer])
+    monkeypatch.setattr("cytraco.bootstrap.trn.check_connection", mock_check_connection)
+    monkeypatch.setattr("cytraco.bootstrap.trn.scan_for_trainers", mock_scan)
+
     mock_setup_ui = MagicMock()
-    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
+    result = await bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is not None
     assert result.ftp == existing_config.ftp
@@ -77,26 +91,37 @@ def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
     mock_setup_ui.prompt_ftp.assert_not_called()
 
 
-def test_bootstrap_app_missing_config(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_bootstrap_app_missing_config(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """bootstrap_app should prompt and save when config doesn't exist."""
     config_path = tmp_path / "config.toml"
     test_ftp = generate.ftp()
+    trainer = generate.trainer_info()
 
     # Use real TomlConfig, no mocking
     config_handler = TomlConfig()
 
+    # Mock trainer functions
+    mock_scan = AsyncMock(return_value=[trainer])
+    monkeypatch.setattr("cytraco.bootstrap.trn.scan_for_trainers", mock_scan)
+
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
+    mock_setup_ui.prompt_single_trainer = AsyncMock(return_value=True)
+    result = await bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is not None
     assert result.ftp == test_ftp
-    assert result.device_address is None
+    assert result.device_address == trainer.address
     mock_setup_ui.prompt_ftp.assert_called_once()
     assert config_path.exists()
 
 
-def test_bootstrap_app_user_exits(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_bootstrap_app_user_exits(tmp_path: Path) -> None:
     """bootstrap_app should return None when user exits during setup."""
     config_path = tmp_path / "config.toml"
 
@@ -104,7 +129,7 @@ def test_bootstrap_app_user_exits(tmp_path: Path) -> None:
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = None
-    result = bootstrap_app(config_path, config_handler, mock_setup_ui)
+    result = await bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is None
     mock_setup_ui.prompt_ftp.assert_called_once()
