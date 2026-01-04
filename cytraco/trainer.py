@@ -1,12 +1,10 @@
 """Trainer detection and BLE scanning. Alias: trn."""
 
 from dataclasses import dataclass
-from pathlib import Path
 
 import bleak
 
-from cytraco import bootstrap, errors
-from cytraco.model import config as cfg
+from cytraco import errors
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -53,39 +51,20 @@ async def scan_for_trainers() -> list[TrainerInfo]:
     ]
 
 
-async def detect_trainer(config_handler: bootstrap.AppConfig, config_path: Path) -> TrainerInfo:
-    """Detect and persist trainer selection.
+async def check_connection(address: str) -> bool:
+    """Test BLE connection to trainer at given address.
 
-    Scans for BLE trainers and handles selection. If exactly one trainer is
-    found, saves it to config and returns it. Otherwise, raises an error.
-    Preserves existing config values (like FTP) when updating device address.
+    Attempts to establish a BLE connection to verify the trainer is reachable.
+    Does not raise exceptions on connection failure.
 
     Args:
-        config_handler: AppConfig implementation for persisting selection
-        config_path: Path to configuration file
+        address: BLE device address to test
 
     Returns:
-        TrainerInfo for the detected trainer
-
-    Raises:
-        DeviceError: If no trainers found or multiple trainers found
+        True if connection successful, False otherwise
     """
-    trainers = await scan_for_trainers()
-
-    if len(trainers) == 0:
-        raise errors.DeviceError("No trainers found")
-    if len(trainers) > 1:
-        raise errors.DeviceError(f"Found {len(trainers)} trainers, expected exactly 1")
-
-    # Load existing config or create new one
     try:
-        config = config_handler.load_file(config_path)
-    except FileNotFoundError:
-        config = cfg.Config(ftp=300)
-
-    # Update device address and save
-    trainer = trainers[0]
-    config.device_address = trainer.address
-    config_handler.write_file(config_path, config)
-
-    return trainer
+        async with bleak.BleakClient(address):
+            return True
+    except Exception:  # noqa: BLE001
+        return False

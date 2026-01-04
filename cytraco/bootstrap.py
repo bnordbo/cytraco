@@ -8,6 +8,7 @@ are implemented by higher layers following the dependency inversion principle.
 from pathlib import Path
 from typing import Protocol
 
+from cytraco import trainer as trn
 from cytraco.model.config import Config
 
 
@@ -23,6 +24,50 @@ class SetupUI(Protocol):
 
         Returns:
             FTP value entered by user (positive integer), or None if user exits.
+        """
+        ...
+
+    async def prompt_trainer_selection(
+        self,
+        trainers: list[trn.TrainerInfo],
+    ) -> trn.TrainerInfo | None:
+        """Prompt user to select from multiple trainers.
+
+        Args:
+            trainers: List of discovered trainers (must be non-empty).
+
+        Returns:
+            Selected trainer, or None if user exits.
+        """
+        ...
+
+    async def prompt_single_trainer(self, trainer: trn.TrainerInfo) -> bool | None:
+        """Prompt user to confirm single discovered trainer.
+
+        Args:
+            trainer: The single discovered trainer.
+
+        Returns:
+            True to continue, False to retry scan, None to exit.
+        """
+        ...
+
+    async def prompt_no_trainers(self) -> bool | None:
+        """Prompt user when no trainers found.
+
+        Returns:
+            True to retry scan, None to exit.
+        """
+        ...
+
+    async def prompt_connection_failed(self, address: str) -> str | None:
+        """Prompt user when configured trainer is unreachable.
+
+        Args:
+            address: Device address of configured but unreachable trainer.
+
+        Returns:
+            'retry' to retry connection, 'scan' to scan for trainers, None to exit.
         """
         ...
 
@@ -83,15 +128,16 @@ class AppRunner(Protocol):
         ...
 
 
-def bootstrap_app(
+async def bootstrap_app(
     config_path: Path,
     config_handler: AppConfig,
     setup_ui: SetupUI,
 ) -> Config | None:
-    """Bootstrap Cytraco: ensure config exists, prompting user if needed.
+    """Bootstrap Cytraco: ensure config exists with FTP and trainer.
 
-    Loads existing configuration or prompts user for required values
-    (like FTP) if config doesn't exist. Saves the configuration to disk.
+    Loads existing configuration or prompts user for required values.
+    Tests configured trainer connection or scans for trainers as needed.
+    Saves complete configuration with both FTP and trainer to disk.
 
     Args:
         config_path: Path to configuration file.
@@ -99,16 +145,85 @@ def bootstrap_app(
         setup_ui: SetupUI implementation for prompting user.
 
     Returns:
-        Complete configuration, or None if user exits during setup.
+        Complete configuration with FTP and trainer, or None if user exits.
     """
+    # Load or create config with FTP
     if config_path.exists():
-        return config_handler.load_file(config_path)
+        config = config_handler.load_file(config_path)
+    else:
+        ftp_value = setup_ui.prompt_ftp()
+        if ftp_value is None:
+            return None
+        config = Config(ftp=ftp_value)
 
-    ftp_value = setup_ui.prompt_ftp()
-    if ftp_value is None:
+    # Test configured trainer or scan for trainers
+    selected_trainer = await _select_trainer(config, setup_ui)
+    if selected_trainer is None:
         return None
 
-    config = Config(ftp=ftp_value)
+    # Update and save config with trainer
+    config.device_address = selected_trainer.address
     config_handler.write_file(config_path, config)
 
     return config
+
+
+async def _select_trainer(config: Config, setup_ui: SetupUI) -> trn.TrainerInfo | None:  # noqa: C901, PLR0911, PLR0912
+    """Select trainer through connection test or scan.
+
+    Args:
+        config: Current configuration (may have device_address set).
+        setup_ui: SetupUI implementation for prompting user.
+
+    Returns:
+        Selected trainer, or None if user exits.
+    """
+    # Test configured trainer if present
+    if config.device_address is not None:
+        if await trn.check_connection(config.device_address):
+            # Connection successful, find trainer info from scan
+            trainers = await trn.scan_for_trainers()
+            for trainer in trainers:
+                if trainer.address == config.device_address:
+                    return trainer
+            # Address configured but not found in scan, treat as unreachable
+
+        # Configured trainer unreachable, prompt user
+        while True:
+            choice = await setup_ui.prompt_connection_failed(config.device_address)
+            if choice is None:
+                return None
+            if choice == "retry":
+                if await trn.check_connection(config.device_address):
+                    # Find trainer info from scan
+                    trainers = await trn.scan_for_trainers()
+                    for trainer in trainers:
+                        if trainer.address == config.device_address:
+                            return trainer
+                continue
+            if choice == "scan":
+                break
+
+    # Scan for trainers
+    while True:
+        trainers = await trn.scan_for_trainers()
+
+        if len(trainers) == 0:
+            retry = await setup_ui.prompt_no_trainers()
+            if retry is None:
+                return None
+            continue
+
+        if len(trainers) == 1:
+            choice = await setup_ui.prompt_single_trainer(trainers[0])
+            if choice is None:
+                return None
+            if choice is True:
+                return trainers[0]
+            continue
+
+        # Multiple trainers
+        selected = await setup_ui.prompt_trainer_selection(trainers)
+        if selected is None:
+            return None
+        return selected
