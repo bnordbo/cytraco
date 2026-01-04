@@ -20,6 +20,7 @@ Additionally:
 ## Communication
 - Be brief in all interactions. 
 - Don't use unnecessary courtesies. 
+- Use neutral, descriptive language. Replace subjective qualifiers (good/bad/great/poor) with specific, observable characteristics or measurable properties.
 
 ## Commits
 - Never start a plan on a dirty repo. Changes must be committed first.
