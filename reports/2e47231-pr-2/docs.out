@@ -1,0 +1,29 @@
+================= Coverage for /Users/bn/.local/src/cytraco2/ ==================
+----------------------------------- Summary ------------------------------------
+| Name                             |    Total |    Miss |    Cover |    Cover% |
+|----------------------------------|----------|---------|----------|-----------|
+| .vulture_whitelist.py            |        1 |       1 |        0 |        0% |
+| cytraco/__init__.py              |        1 |       0 |        1 |      100% |
+| cytraco/bootstrap.py             |        9 |       0 |        9 |      100% |
+| cytraco/cli.py                   |        2 |       0 |        2 |      100% |
+| cytraco/config.py                |        4 |       0 |        4 |      100% |
+| cytraco/errors.py                |        6 |       0 |        6 |      100% |
+| cytraco/trainer.py               |        4 |       0 |        4 |      100% |
+| cytraco/workout.py               |        5 |       0 |        5 |      100% |
+| cytraco/model/__init__.py        |        1 |       0 |        1 |      100% |
+| cytraco/model/config.py          |        2 |       0 |        2 |      100% |
+| cytraco/model/power.py           |        2 |       0 |        2 |      100% |
+| cytraco/ui/__init__.py           |        1 |       0 |        1 |      100% |
+| cytraco/ui/setup.py              |        3 |       0 |        3 |      100% |
+| tests/__init__.py                |        1 |       0 |        1 |      100% |
+| tests/generators.py              |        6 |       0 |        6 |      100% |
+| tests/test_bootstrap.py          |       14 |       0 |       14 |      100% |
+| tests/test_config.py             |       10 |       0 |       10 |      100% |
+| tests/test_errors.py             |        6 |       0 |        6 |      100% |
+| tests/test_power.py              |        3 |       0 |        3 |      100% |
+| tests/test_trainer.py            |       10 |       0 |       10 |      100% |
+| tests/test_ui_setup.py           |       10 |       2 |        8 |       80% |
+| tests/test_workout.py            |        9 |       0 |        9 |      100% |
+|----------------------------------|----------|---------|----------|-----------|
+| TOTAL                            |      110 |       3 |      107 |     97.3% |
+---------------- RESULT: PASSED (minimum: 80.0%, actual: 97.3%) ----------------
