@@ -1,16 +1,12 @@
 """Tests for bootstrap protocols."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-from cytraco.bootstrap import bootstrap_app
+from cytraco.bootstrap import AppConfig, AppRunner, bootstrap_app
 from cytraco.config import TomlConfig
 from cytraco.model.config import Config
 from tests import generators as generate
-
-if TYPE_CHECKING:
-    from cytraco.bootstrap import AppConfig, AppRunner
 
 
 class MockConfigurable:
@@ -75,6 +71,7 @@ def test_bootstrap_app_existing_config(tmp_path: Path) -> None:
     mock_setup_ui = MagicMock()
     result = bootstrap_app(config_path, config_handler, mock_setup_ui)
 
+    assert result is not None
     assert result.ftp == existing_config.ftp
     assert result.device_address == existing_config.device_address
     mock_setup_ui.prompt_ftp.assert_not_called()

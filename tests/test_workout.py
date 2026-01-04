@@ -1,15 +1,12 @@
 """Tests for workout protocols."""
 
 import asyncio
-from typing import TYPE_CHECKING
 
 import pytest
 
 from cytraco.model.power import PowerData
+from cytraco.workout import PowerMeter
 from tests import generators as generate
-
-if TYPE_CHECKING:
-    from cytraco.workout import PowerMeter
 
 
 class MockPowerMeter:

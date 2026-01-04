@@ -103,6 +103,7 @@ ignore = [
     "D213",
     "D413",
     "S101",
+    "TC001",   # Favour slight readability of slight startup speed
     "TRY003",  # raise-vanilla-args
 ]
 

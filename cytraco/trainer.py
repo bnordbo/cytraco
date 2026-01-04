@@ -2,15 +2,11 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import bleak
 
-from cytraco import errors
+from cytraco import bootstrap, errors
 from cytraco.model import config as cfg
-
-if TYPE_CHECKING:
-    from cytraco import bootstrap
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -57,11 +53,11 @@ async def scan_for_trainers() -> list[TrainerInfo]:
     ]
 
 
-async def detect_trainer(config_handler: "bootstrap.AppConfig", config_path: Path) -> TrainerInfo:
+async def detect_trainer(config_handler: bootstrap.AppConfig, config_path: Path) -> TrainerInfo:
     """Detect and persist trainer selection.
 
     Scans for BLE trainers and handles selection. If exactly one trainer is
-    found, saves it to config and returns it. Otherwise raises an error.
+    found, saves it to config and returns it. Otherwise, raises an error.
     Preserves existing config values (like FTP) when updating device address.
 
     Args:

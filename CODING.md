@@ -18,3 +18,4 @@ Use the code style specified in [PEP8](https://peps.python.org/pep-0008/) as a b
 - Don't declare variables that are only used once, and whose name does not add anything.
 - Use vertical whitespace inside methods sparingly, and only to separate logical sections such as setup/execute/assert in tests.
 - Alias import to shorter names, e.g. config -> cfg. Module aliases are documented on the first line of each module.
+- Import dependencies even if they are only used for type-checking. It is a slight simplification at the cost of slightly slower startup speed.

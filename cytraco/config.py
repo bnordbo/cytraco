@@ -52,7 +52,7 @@ class TomlConfig:
             path.parent.mkdir(parents=True, exist_ok=True)
 
             # Build data dict, skip None values
-            data = {"ftp": config.ftp}
+            data: dict[str, str | int] = {"ftp": config.ftp}
             if config.device_address is not None:
                 data["device_address"] = config.device_address
 

@@ -115,7 +115,7 @@ def test_permission_error(tmp_path: Path) -> None:
     config = generate.config()
 
     try:
-        with pytest.raises(errors.ConfigError, match="Permission denied|Failed to write config"):
+        with pytest.raises(errors.ConfigError, match=r"Permission denied|Failed to write config"):
             toml_config.write_file(config_path, config)
     finally:
         # Restore permissions for cleanup
