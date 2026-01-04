@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cytraco.bootstrap import AppConfig, AppRunner, bootstrap_app
+from cytraco.bootstrap import AppConfig, AppRunner, UserChoice, bootstrap_app
 from cytraco.config import TomlConfig
 from cytraco.model.config import Config
 from tests import generators as generate
@@ -110,7 +110,7 @@ async def test_bootstrap_app_missing_config(
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-    mock_setup_ui.prompt_single_trainer = AsyncMock(return_value=True)
+    mock_setup_ui.prompt_single_trainer.return_value = UserChoice.CONTINUE
     result = await bootstrap_app(config_path, config_handler, mock_setup_ui)
 
     assert result is not None

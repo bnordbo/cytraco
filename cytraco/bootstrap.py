@@ -5,11 +5,35 @@ are implemented by higher layers following the dependency inversion principle.
 
 """
 
+from enum import Enum
 from pathlib import Path
 from typing import Protocol
 
 from cytraco import trainer as trn
 from cytraco.model.config import Config
+
+
+class UserChoice(Enum):
+    """User input choices with keyboard shortcuts."""
+
+    CONTINUE = ("c", "continue")
+    RETRY = ("r", "retry")
+    SCAN = ("s", "scan")
+    EXIT = ("e", "exit")
+
+    def __init__(self, shortcut: str, description: str) -> None:
+        """Initialize choice with shortcut and description."""
+        self.shortcut = shortcut
+        self.description = description
+
+    @classmethod
+    def from_input(cls, value: str) -> "UserChoice | None":
+        """Parse user input to UserChoice."""
+        value_lower = value.lower().strip()
+        for choice in cls:
+            if value_lower == choice.shortcut:
+                return choice
+        return None
 
 
 class SetupUI(Protocol):
@@ -27,7 +51,7 @@ class SetupUI(Protocol):
         """
         ...
 
-    async def prompt_trainer_selection(
+    def prompt_trainer_selection(
         self,
         trainers: list[trn.TrainerInfo],
     ) -> trn.TrainerInfo | None:
@@ -41,33 +65,34 @@ class SetupUI(Protocol):
         """
         ...
 
-    async def prompt_single_trainer(self, trainer: trn.TrainerInfo) -> bool | None:
+    def prompt_single_trainer(self, trainer: trn.TrainerInfo) -> UserChoice | None:
         """Prompt user to confirm single discovered trainer.
 
         Args:
             trainer: The single discovered trainer.
 
         Returns:
-            True to continue, False to retry scan, None to exit.
+            UserChoice.CONTINUE to continue, UserChoice.RETRY to retry scan,
+            or None if user exits.
         """
         ...
 
-    async def prompt_no_trainers(self) -> bool | None:
+    def prompt_no_trainers(self) -> UserChoice | None:
         """Prompt user when no trainers found.
 
         Returns:
-            True to retry scan, None to exit.
+            UserChoice.RETRY to retry scan, or None if user exits.
         """
         ...
 
-    async def prompt_connection_failed(self, address: str) -> str | None:
+    def prompt_connection_failed(self, address: str) -> UserChoice | None:
         """Prompt user when configured trainer is unreachable.
 
         Args:
             address: Device address of configured but unreachable trainer.
 
         Returns:
-            'retry' to retry connection, 'scan' to scan for trainers, None to exit.
+            UserChoice (RETRY, SCAN), or None if user exits.
         """
         ...
 
@@ -133,11 +158,11 @@ async def bootstrap_app(
     config_handler: AppConfig,
     setup_ui: SetupUI,
 ) -> Config | None:
-    """Bootstrap Cytraco: ensure config exists with FTP and trainer.
+    """Bootstrap Cytraco: ensure config exists.
 
     Loads existing configuration or prompts user for required values.
     Tests configured trainer connection or scans for trainers as needed.
-    Saves complete configuration with both FTP and trainer to disk.
+    Saves configuration to disk.
 
     Args:
         config_path: Path to configuration file.
@@ -145,7 +170,7 @@ async def bootstrap_app(
         setup_ui: SetupUI implementation for prompting user.
 
     Returns:
-        Complete configuration with FTP and trainer, or None if user exits.
+        Complete configuration, or None if user exits.
     """
     # Load or create config with FTP
     if config_path.exists():
@@ -168,7 +193,86 @@ async def bootstrap_app(
     return config
 
 
-async def _select_trainer(config: Config, setup_ui: SetupUI) -> trn.TrainerInfo | None:  # noqa: C901, PLR0911, PLR0912
+async def _test_configured_trainer(address: str) -> trn.TrainerInfo | None:
+    """Test connection to configured trainer and return TrainerInfo if reachable.
+
+    Args:
+        address: Device address of configured trainer.
+
+    Returns:
+        TrainerInfo if connection succeeds and trainer found in scan, None otherwise.
+    """
+    if not await trn.check_connection(address):
+        return None
+    trainers = await trn.scan_for_trainers()
+    for trainer in trainers:
+        if trainer.address == address:
+            return trainer
+    return None
+
+
+async def _handle_unreachable_trainer(
+    address: str,
+    setup_ui: SetupUI,
+) -> trn.TrainerInfo | None:
+    """Handle unreachable configured trainer with retry/scan options.
+
+    Args:
+        address: Device address of configured but unreachable trainer.
+        setup_ui: SetupUI implementation for prompting user.
+
+    Returns:
+        TrainerInfo if retry succeeds or user chooses scan, None if user exits.
+        Returns sentinel value "scan" to indicate user chose to scan.
+    """
+    while True:
+        choice = setup_ui.prompt_connection_failed(address)
+        if choice is None:
+            return None
+        if choice == UserChoice.RETRY:
+            trainer = await _test_configured_trainer(address)
+            if trainer is not None:
+                return trainer
+            continue
+        if choice == UserChoice.SCAN:
+            return "scan"  # Sentinel to continue to scan flow
+        return None
+
+
+async def _scan_and_select_trainer(setup_ui: SetupUI) -> trn.TrainerInfo | None:
+    """Scan for trainers and handle user selection.
+
+    Args:
+        setup_ui: SetupUI implementation for prompting user.
+
+    Returns:
+        Selected TrainerInfo, or None if user exits.
+    """
+    while True:
+        trainers = await trn.scan_for_trainers()
+
+        if len(trainers) == 0:
+            choice = setup_ui.prompt_no_trainers()
+            if choice is None or choice != UserChoice.RETRY:
+                return None
+            continue
+
+        if len(trainers) == 1:
+            choice = setup_ui.prompt_single_trainer(trainers[0])
+            if choice is None:
+                return None
+            if choice == UserChoice.CONTINUE:
+                return trainers[0]
+            continue
+
+        # Multiple trainers
+        selected = setup_ui.prompt_trainer_selection(trainers)
+        if selected is None:
+            return None
+        return selected
+
+
+async def _select_trainer(config: Config, setup_ui: SetupUI) -> trn.TrainerInfo | None:
     """Select trainer through connection test or scan.
 
     Args:
@@ -180,50 +284,16 @@ async def _select_trainer(config: Config, setup_ui: SetupUI) -> trn.TrainerInfo 
     """
     # Test configured trainer if present
     if config.device_address is not None:
-        if await trn.check_connection(config.device_address):
-            # Connection successful, find trainer info from scan
-            trainers = await trn.scan_for_trainers()
-            for trainer in trainers:
-                if trainer.address == config.device_address:
-                    return trainer
-            # Address configured but not found in scan, treat as unreachable
+        trainer = await _test_configured_trainer(config.device_address)
+        if trainer is not None:
+            return trainer
 
-        # Configured trainer unreachable, prompt user
-        while True:
-            choice = await setup_ui.prompt_connection_failed(config.device_address)
-            if choice is None:
-                return None
-            if choice == "retry":
-                if await trn.check_connection(config.device_address):
-                    # Find trainer info from scan
-                    trainers = await trn.scan_for_trainers()
-                    for trainer in trainers:
-                        if trainer.address == config.device_address:
-                            return trainer
-                continue
-            if choice == "scan":
-                break
-
-    # Scan for trainers
-    while True:
-        trainers = await trn.scan_for_trainers()
-
-        if len(trainers) == 0:
-            retry = await setup_ui.prompt_no_trainers()
-            if retry is None:
-                return None
-            continue
-
-        if len(trainers) == 1:
-            choice = await setup_ui.prompt_single_trainer(trainers[0])
-            if choice is None:
-                return None
-            if choice is True:
-                return trainers[0]
-            continue
-
-        # Multiple trainers
-        selected = await setup_ui.prompt_trainer_selection(trainers)
-        if selected is None:
+        # Trainer unreachable, prompt user
+        result = await _handle_unreachable_trainer(config.device_address, setup_ui)
+        if result is None:
             return None
-        return selected
+        if result != "scan":
+            return result
+
+    # Scan for trainers (either no trainer configured or user chose scan)
+    return await _scan_and_select_trainer(setup_ui)

@@ -1,5 +1,6 @@
 """UI for initial setup and configuration. Alias: sup."""
 
+from cytraco import bootstrap as bts
 from cytraco import trainer as trn
 
 
@@ -30,18 +31,11 @@ class TerminalSetup:
             except (KeyboardInterrupt, EOFError):
                 return None
 
-    async def prompt_trainer_selection(
+    def prompt_trainer_selection(
         self,
         trainers: list[trn.TrainerInfo],
     ) -> trn.TrainerInfo | None:
-        """Prompt user to select from multiple trainers.
-
-        Args:
-            trainers: List of discovered trainers (must be non-empty).
-
-        Returns:
-            Selected trainer, or None if user exits.
-        """
+        """Prompt user to select from multiple trainers."""
         print("\nMultiple trainers found:")
         for i, trainer in enumerate(trainers, 1):
             print(f"{i}. {trainer.name} at {trainer.address} ({trainer.rssi} dBm)")
@@ -53,7 +47,7 @@ class TerminalSetup:
                 if value == "e":
                     return None
                 if value == "r":
-                    return await self.prompt_trainer_selection(trainers)
+                    return self.prompt_trainer_selection(trainers)
                 try:
                     index = int(value) - 1
                     if 0 <= index < len(trainers):
@@ -64,71 +58,54 @@ class TerminalSetup:
             except (KeyboardInterrupt, EOFError):
                 return None
 
-    async def prompt_single_trainer(self, trainer: trn.TrainerInfo) -> bool | None:
-        """Prompt user to confirm single discovered trainer.
-
-        Args:
-            trainer: The single discovered trainer.
-
-        Returns:
-            True to continue, False to retry scan, None to exit.
-        """
+    def prompt_single_trainer(self, trainer: trn.TrainerInfo) -> bts.UserChoice | None:
+        """Prompt user to confirm single discovered trainer."""
         print(f"\nFound trainer: {trainer.name} at {trainer.address}")
         print("(c)ontinue, (r)etry, or (e)xit:")
 
         while True:
             try:
-                value = input("> ").strip().lower()
-                if value == "c":
-                    return True
-                if value == "r":
-                    return False
-                if value == "e":
+                value = input("> ").strip()
+                choice = bts.UserChoice.from_input(value)
+                if choice == bts.UserChoice.CONTINUE:
+                    return choice
+                if choice == bts.UserChoice.RETRY:
+                    return choice
+                if choice == bts.UserChoice.EXIT:
                     return None
                 print("Invalid input. Please enter (c)ontinue, (r)etry, or (e)xit.")
             except (KeyboardInterrupt, EOFError):
                 return None
 
-    async def prompt_no_trainers(self) -> bool | None:
-        """Prompt user when no trainers found.
-
-        Returns:
-            True to retry scan, None to exit.
-        """
+    def prompt_no_trainers(self) -> bts.UserChoice | None:
+        """Prompt user when no trainers found."""
         print("\nNo trainers found.")
         print("(r)etry or (e)xit:")
 
         while True:
             try:
-                value = input("> ").strip().lower()
-                if value == "r":
-                    return True
-                if value == "e":
+                value = input("> ").strip()
+                choice = bts.UserChoice.from_input(value)
+                if choice == bts.UserChoice.RETRY:
+                    return choice
+                if choice == bts.UserChoice.EXIT:
                     return None
                 print("Invalid input. Please enter (r)etry or (e)xit.")
             except (KeyboardInterrupt, EOFError):
                 return None
 
-    async def prompt_connection_failed(self, address: str) -> str | None:
-        """Prompt user when configured trainer is unreachable.
-
-        Args:
-            address: Device address of configured but unreachable trainer.
-
-        Returns:
-            'retry' to retry connection, 'scan' to scan for trainers, None to exit.
-        """
+    def prompt_connection_failed(self, address: str) -> bts.UserChoice | None:
+        """Prompt user when configured trainer is unreachable."""
         print(f"\nCannot connect to trainer at {address}")
         print("(r)etry, (s)can, or (e)xit:")
 
         while True:
             try:
-                value = input("> ").strip().lower()
-                if value == "r":
-                    return "retry"
-                if value == "s":
-                    return "scan"
-                if value == "e":
+                value = input("> ").strip()
+                choice = bts.UserChoice.from_input(value)
+                if choice in (bts.UserChoice.RETRY, bts.UserChoice.SCAN):
+                    return choice
+                if choice == bts.UserChoice.EXIT:
                     return None
                 print("Invalid input. Please enter (r)etry, (s)can, or (e)xit.")
             except (KeyboardInterrupt, EOFError):
