@@ -2,6 +2,7 @@
 
 from unittest.mock import AsyncMock, MagicMock
 
+import bleak
 import pytest
 
 from cytraco import errors
@@ -117,7 +118,7 @@ async def test_check_connection_failure(monkeypatch: pytest.MonkeyPatch) -> None
     # Mock BleakClient to raise exception
     class MockClient:
         async def __aenter__(self):  # noqa: ANN204
-            raise Exception("Connection failed")  # noqa: TRY002
+            raise bleak.BleakError("Connection failed")
 
         async def __aexit__(self, *_):  # noqa: ANN002, ANN204
             pass

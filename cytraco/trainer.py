@@ -66,5 +66,5 @@ async def check_connection(address: str) -> bool:
     try:
         async with bleak.BleakClient(address):
             return True
-    except Exception:  # noqa: BLE001 - Catch all BLE errors, return False for any failure
+    except (bleak.BleakError, OSError, TimeoutError):
         return False
