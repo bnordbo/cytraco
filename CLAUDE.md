@@ -22,8 +22,10 @@ Additionally:
 - Don't use unnecessary courtesies. 
 - Use neutral, descriptive language. Replace subjective qualifiers (good/bad/great/poor) with specific, observable characteristics or measurable properties.
 
-## Commits
+## Commits and pull requests
 - Never start a plan on a dirty repo. Changes must be committed first.
+- Never edit comments. Instead, respond to individual comments.
+- If a comment has a trivial fix, it can be resolved after pushing and commenting on it.
 
 ## Commands
 
@@ -45,9 +47,6 @@ coverage report
 # Check for dead code
 vulture
 ```
-
-## Pull requests
-- Never edit comments. Respond instead. 
 
 ## Common mistakes
 - Don't create test generators for maps and lists.

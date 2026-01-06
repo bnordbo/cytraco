@@ -26,11 +26,7 @@ If the FTP is not configured, ask the user to enter a value. Store it in the con
 The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).
 
 *** TODO Implement user selection UI for trainer detection
-:LOGBOOK:
-CLOCK: [2026-01-04 Sun 12:20]
-CLOCK: [2026-01-04 Sun 11:51]--[2026-01-04 Sun 12:01] =>  0:10
-:END:
-If Cytraco has a trained configured, and can connect to it, continue without any interactions. Otherwise, offer to retry, exit or continue in demo mode:
+If Cytraco has a trainer configured, and can connect to it, continue without any interactions. Otherwise, offer to retry, exit or continue in demo mode:
 
 #+begin_example
 Trainer not found. (r)etry, (s)can, (e)xit or (c)ontinue in demo mode?
@@ -48,13 +44,15 @@ Otherwise, if it finds exactly one, show it and offer to continue:
 Found a Wahoo Kickr Core at AA:BB:CC... (r)etry, (e)xit or (c)ontinue
 #+end_example
 
-When it finds multiple trainers, allow the user to select one by entering the number corresponding to the list of trainers. Once the user has selected one, continue as if one was found:
+When it finds multiple trainers, allow the user to select one by entering the number corresponding to the list of trainers. Once the user has selected one, continue as if it found one in the previous step:
 
+#+begin_example
 Found multiple trainers, please select one:
 1. Wahoo Kickr Core at AA:BB:CC
 2. Elite ....
 3. Tracx ...
 Enter a number (1–3) to continue, (r)etry or (e)xit.
+#+end_example
 
 The trainer selection should happen after the user setup, if applicable. Cytraco should store the resulting configuration from the two steps in the same operation.
 
