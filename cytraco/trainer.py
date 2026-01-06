@@ -1,14 +1,31 @@
 """Trainer detection and BLE scanning. Alias: trn."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from pathlib import Path
+from enum import Enum
+from typing import TYPE_CHECKING
 
 import bleak
 
-from cytraco import bootstrap, errors
+from cytraco import errors
 from cytraco.model import config as cfg
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from cytraco import bootstrap
+
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
+
+
+class UserAction(Enum):
+    """Actions user can take during trainer selection."""
+
+    RETRY = "retry"
+    SCAN = "scan"
+    EXIT = "exit"
+    DEMO = "demo"
 
 
 @dataclass
@@ -24,6 +41,16 @@ class TrainerInfo:
     name: str
     address: str
     rssi: int
+
+
+@dataclass
+class TrainerSelected:
+    """Result when user selects a trainer."""
+
+    trainer: TrainerInfo
+
+
+TrainerResult = TrainerSelected | UserAction
 
 
 async def scan_for_trainers() -> list[TrainerInfo]:
@@ -51,6 +78,34 @@ async def scan_for_trainers() -> list[TrainerInfo]:
         TrainerInfo(name=d.name or "Unknown", address=d.address, rssi=adv.rssi)
         for d, adv in devices.values()
     ]
+
+
+async def connect(address: str) -> bool:
+    """Connect to a trainer at the given BLE address.
+
+    Args:
+        address: BLE address of the trainer.
+
+    Returns:
+        True if connection successful, False otherwise.
+    """
+    try:
+        async with bleak.BleakClient(address) as client:
+            return client.is_connected
+    except (bleak.exc.BleakError, OSError, TimeoutError):
+        return False
+
+
+class BleakTrainerScanner:
+    """Trainer scanner implementation using Bleak BLE library."""
+
+    async def scan(self) -> list[TrainerInfo]:
+        """Scan for available trainers."""
+        return await scan_for_trainers()
+
+    async def connect(self, address: str) -> bool:
+        """Attempt to connect to a trainer."""
+        return await connect(address)
 
 
 async def detect_trainer(config_handler: bootstrap.AppConfig, config_path: Path) -> TrainerInfo:
