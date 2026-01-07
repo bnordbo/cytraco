@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+import cytraco.model.config as cfg
 import cytraco.trainer as trn
-from cytraco.model import config as cfg
 
 
 @dataclass

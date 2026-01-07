@@ -1,20 +1,26 @@
 """Trainer detection and BLE scanning. Alias: trn."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Protocol
 
 import bleak
 
+import cytraco.model.config as cfg
 from cytraco import errors
-from cytraco.model import config as cfg
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-    import cytraco.bootstrap as bts
+class ConfigHandler(Protocol):
+    """Protocol for config persistence in detect_trainer."""
+
+    def load_file(self, path: Path) -> cfg.Config:
+        """Load config from path."""
+        ...
+
+    def write_file(self, path: Path, config: cfg.Config) -> None:
+        """Write config to path."""
+        ...
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -98,7 +104,7 @@ class BleakTrainerScanner:
             return False
 
 
-async def detect_trainer(config_handler: bts.AppConfig, config_path: Path) -> TrainerInfo:
+async def detect_trainer(config_handler: ConfigHandler, config_path: Path) -> TrainerInfo:
     """Detect and persist trainer selection.
 
     Scans for BLE trainers and handles selection. If exactly one trainer is
@@ -106,7 +112,7 @@ async def detect_trainer(config_handler: bts.AppConfig, config_path: Path) -> Tr
     Preserves existing config values (like FTP) when updating device address.
 
     Args:
-        config_handler: AppConfig implementation for persisting selection
+        config_handler: ConfigHandler implementation for persisting selection
         config_path: Path to configuration file
 
     Returns:
@@ -115,8 +121,7 @@ async def detect_trainer(config_handler: bts.AppConfig, config_path: Path) -> Tr
     Raises:
         DeviceError: If no trainers found or multiple trainers found
     """
-    scanner = BleakTrainerScanner()
-    trainers = await scanner.scan()
+    trainers = await BleakTrainerScanner().scan()
 
     if len(trainers) == 0:
         raise errors.DeviceError("No trainers found")
