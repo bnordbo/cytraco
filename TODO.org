@@ -25,7 +25,15 @@ If the FTP is not configured, ask the user to enter a value. Store it in the con
 
 The UI code should be under `cytraco.ui.setup`, i.e. this is a special UI for the setup phase. For the workout console, we will use Ruff. It would be nice to use that for this task too, though it may not be ideal (i.e. it doesn't have a selection menu).
 
-*** TODO Implement user selection UI for trainer detection
+*** DONE Implement user selection UI for trainer detection
+CLOSED: [2026-01-07 Wed 18:30]
+- State "DONE"       from "TODO"       [2026-01-07 Wed 18:30]
+:LOGBOOK:
+CLOCK: [2026-01-07 Wed 18:19]--[2026-01-07 Wed 18:30] =>  0:11
+CLOCK: [2026-01-07 Wed 14:24]--[2026-01-07 Wed 15:48] =>  1:24
+CLOCK: [2026-01-06 Tue 18:01]--[2026-01-06 Tue 18:34] =>  0:33
+CLOCK: [2026-01-06 Tue 19:01]--[2026-01-06 Tue 19:13] =>  0:12
+:END:
 If Cytraco has a trainer configured, and can connect to it, continue without any interactions. Otherwise, offer to retry, exit or continue in demo mode:
 
 #+begin_example

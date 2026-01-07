@@ -23,9 +23,11 @@ Additionally:
 - Use neutral, descriptive language. Replace subjective qualifiers (good/bad/great/poor) with specific, observable characteristics or measurable properties.
 
 ## Commits and pull requests
+- Never add all files. `git add -A` is forbidden!
 - Never start a plan on a dirty repo. Changes must be committed first.
 - Never edit comments. Instead, respond to individual comments.
 - If a comment has a trivial fix, it can be resolved after pushing and commenting on it.
+- Always respond to each and every comment _individually_. No exceptions!
 
 ## Commands
 
@@ -55,6 +57,8 @@ vulture
 - Don't use Java-style getters. Use property annotations instead.
 - Don't use literals in test code. Use generators instead.
 - Don't import names from modules except if they are frequently used.
+- Don't import/test `TYPECHECKING`.
+- Always annotate as `staticmethod` _or_ move to toplevel if `self` is not used.
 
 ## Host utilities
 - Ripgrep (`rg`) is available. Use it instead of `grep`.
