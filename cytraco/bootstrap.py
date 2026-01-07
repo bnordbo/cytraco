@@ -5,10 +5,20 @@ are implemented by higher layers following the dependency inversion principle.
 
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-from cytraco.model.config import Config
+import cytraco.model.config as cfg
+import cytraco.trainer as trn
+
+
+@dataclass
+class BootstrapResult:
+    """Result of bootstrap process."""
+
+    config: cfg.Config
+    demo_mode: bool = False
 
 
 class SetupUI(Protocol):
@@ -26,6 +36,28 @@ class SetupUI(Protocol):
         """
         ...
 
+    def prompt_reconnect(self, address: str) -> trn.TrainerResult:
+        """Ask user how to proceed when configured trainer is unreachable.
+
+        Args:
+            address: The BLE address of the unreachable trainer.
+
+        Returns:
+            User's choice: RETRY, SCAN, EXIT, or DEMO.
+        """
+        ...
+
+    def prompt_trainer_selection(self, trainers: list[trn.TrainerInfo]) -> trn.TrainerResult:
+        """Show discovered trainers and let user select one.
+
+        Args:
+            trainers: List of discovered trainers (may be empty).
+
+        Returns:
+            TrainerSelected with chosen trainer, or UserAction (RETRY, EXIT, DEMO).
+        """
+        ...
+
 
 class AppConfig(Protocol):
     """Protocol for configuration management.
@@ -34,7 +66,7 @@ class AppConfig(Protocol):
     to/from files.
     """
 
-    def load_file(self, path: Path) -> Config:
+    def load_file(self, path: Path) -> cfg.Config:
         """Load configuration from file.
 
         Args:
@@ -49,7 +81,7 @@ class AppConfig(Protocol):
         """
         ...
 
-    def write_file(self, path: Path, config: Config) -> None:
+    def write_file(self, path: Path, config: cfg.Config) -> None:
         """Write configuration to a file.
 
         Args:
@@ -58,6 +90,36 @@ class AppConfig(Protocol):
 
         Raises:
             ConfigError: If the file cannot be written or config is invalid.
+        """
+        ...
+
+
+class TrainerScanner(Protocol):
+    """Protocol for trainer discovery and connection.
+
+    Classes implementing this protocol can scan for BLE trainers
+    and attempt connections.
+    """
+
+    async def scan(self) -> list[trn.TrainerInfo]:
+        """Scan for available trainers.
+
+        Returns:
+            List of discovered trainers.
+
+        Raises:
+            DeviceError: If BLE scanning fails.
+        """
+        ...
+
+    async def connect(self, address: str) -> bool:
+        """Attempt to connect to a trainer.
+
+        Args:
+            address: BLE address of the trainer.
+
+        Returns:
+            True if connection successful, False otherwise.
         """
         ...
 
@@ -83,32 +145,63 @@ class AppRunner(Protocol):
         ...
 
 
-def bootstrap_app(
+async def bootstrap_app(
     config_path: Path,
     config_handler: AppConfig,
     setup_ui: SetupUI,
-) -> Config | None:
-    """Bootstrap Cytraco: ensure config exists, prompting user if needed.
+    trainer_scanner: TrainerScanner,
+) -> BootstrapResult | None:
+    """Bootstrap Cytraco: ensure config exists and trainer is selected.
 
     Loads existing configuration or prompts user for required values
-    (like FTP) if config doesn't exist. Saves the configuration to disk.
+    (like FTP) if config doesn't exist. Handles trainer detection and
+    selection. Saves the configuration to disk.
 
     Args:
         config_path: Path to configuration file.
         config_handler: AppConfig implementation for loading/saving config.
         setup_ui: SetupUI implementation for prompting user.
+        trainer_scanner: TrainerScanner implementation for BLE operations.
 
     Returns:
-        Complete configuration, or None if user exits during setup.
+        BootstrapResult with config and demo_mode flag, or None if user exits.
     """
+    # Load existing config or prompt for FTP
     if config_path.exists():
-        return config_handler.load_file(config_path)
+        config = config_handler.load_file(config_path)
+    else:
+        if (ftp_value := setup_ui.prompt_ftp()) is None:
+            return None
+        config = cfg.Config(ftp=ftp_value)
 
-    ftp_value = setup_ui.prompt_ftp()
-    if ftp_value is None:
-        return None
+    # Handle trainer selection
+    while True:
+        if config.device_address:
+            # Try to connect to configured trainer
+            if await trainer_scanner.connect(config.device_address):
+                config_handler.write_file(config_path, config)
+                return BootstrapResult(config=config, demo_mode=False)
+            # Connection failed, ask user what to do
+            result = setup_ui.prompt_reconnect(config.device_address)
+        else:
+            # No trainer configured, scan for trainers
+            trainers = await trainer_scanner.scan()
+            result = setup_ui.prompt_trainer_selection(trainers)
 
-    config = Config(ftp=ftp_value)
-    config_handler.write_file(config_path, config)
+        # Handle user's choice
+        if isinstance(result, trn.TrainerSelected):
+            config.device_address = result.trainer.address
+            config_handler.write_file(config_path, config)
+            return BootstrapResult(config=config, demo_mode=False)
 
-    return config
+        if result == trn.UserAction.EXIT:
+            return None
+
+        if result == trn.UserAction.DEMO:
+            config_handler.write_file(config_path, config)
+            return BootstrapResult(config=config, demo_mode=True)
+
+        if result == trn.UserAction.SCAN:
+            config.device_address = None  # Clear to trigger scan on next iteration
+
+        # RETRY continues the loop
