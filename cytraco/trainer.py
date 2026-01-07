@@ -14,7 +14,7 @@ from cytraco.model import config as cfg
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from cytraco import bootstrap
+    import cytraco.bootstrap as bts
 
 FTMS_SERVICE_UUID = "00001826-0000-1000-8000-00805f9b34fb"
 
@@ -53,62 +53,52 @@ class TrainerSelected:
 TrainerResult = TrainerSelected | UserAction
 
 
-async def scan_for_trainers() -> list[TrainerInfo]:
-    """Scan for BLE trainers with FTMS.
-
-    Scans for 10 seconds. Callers needing different timeout behavior
-    should wrap with asyncio.timeout().
-
-    Returns:
-        List of discovered trainers with FTMS
-
-    Raises:
-        DeviceError: If BLE scanning fails
-    """
-    try:
-        devices = await bleak.BleakScanner.discover(
-            timeout=10.0,
-            service_uuids=[FTMS_SERVICE_UUID],
-            return_adv=True,
-        )
-    except Exception as e:
-        raise errors.DeviceError(f"BLE scan failed: {e}") from e
-
-    return [
-        TrainerInfo(name=d.name or "Unknown", address=d.address, rssi=adv.rssi)
-        for d, adv in devices.values()
-    ]
-
-
-async def connect(address: str) -> bool:
-    """Connect to a trainer at the given BLE address.
-
-    Args:
-        address: BLE address of the trainer.
-
-    Returns:
-        True if connection successful, False otherwise.
-    """
-    try:
-        async with bleak.BleakClient(address) as client:
-            return client.is_connected
-    except (bleak.exc.BleakError, OSError, TimeoutError):
-        return False
-
-
 class BleakTrainerScanner:
     """Trainer scanner implementation using Bleak BLE library."""
 
     async def scan(self) -> list[TrainerInfo]:
-        """Scan for available trainers."""
-        return await scan_for_trainers()
+        """Scan for BLE trainers with FTMS.
+
+        Scans for 10 seconds. Callers needing different timeout behavior
+        should wrap with asyncio.timeout().
+
+        Returns:
+            List of discovered trainers with FTMS
+
+        Raises:
+            DeviceError: If BLE scanning fails
+        """
+        try:
+            devices = await bleak.BleakScanner.discover(
+                timeout=10.0,
+                service_uuids=[FTMS_SERVICE_UUID],
+                return_adv=True,
+            )
+        except Exception as e:
+            raise errors.DeviceError(f"BLE scan failed: {e}") from e
+
+        return [
+            TrainerInfo(name=d.name or "Unknown", address=d.address, rssi=adv.rssi)
+            for d, adv in devices.values()
+        ]
 
     async def connect(self, address: str) -> bool:
-        """Attempt to connect to a trainer."""
-        return await connect(address)
+        """Connect to a trainer at the given BLE address.
+
+        Args:
+            address: BLE address of the trainer.
+
+        Returns:
+            True if connection successful, False otherwise.
+        """
+        try:
+            async with bleak.BleakClient(address) as client:
+                return client.is_connected
+        except (bleak.exc.BleakError, OSError, TimeoutError):
+            return False
 
 
-async def detect_trainer(config_handler: bootstrap.AppConfig, config_path: Path) -> TrainerInfo:
+async def detect_trainer(config_handler: bts.AppConfig, config_path: Path) -> TrainerInfo:
     """Detect and persist trainer selection.
 
     Scans for BLE trainers and handles selection. If exactly one trainer is
@@ -125,7 +115,8 @@ async def detect_trainer(config_handler: bootstrap.AppConfig, config_path: Path)
     Raises:
         DeviceError: If no trainers found or multiple trainers found
     """
-    trainers = await scan_for_trainers()
+    scanner = BleakTrainerScanner()
+    trainers = await scanner.scan()
 
     if len(trainers) == 0:
         raise errors.DeviceError("No trainers found")

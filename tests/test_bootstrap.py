@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cytraco.bootstrap import AppConfig, AppRunner, BootstrapResult, bootstrap_app
-from cytraco.config import TomlConfig
-from cytraco.model.config import Config
-from cytraco.trainer import TrainerSelected, UserAction
+import cytraco.bootstrap as bts
+import cytraco.config as cfg
+import cytraco.trainer as trn
+from cytraco.model import config as mcfg
 from tests import generators as generate
 
 
@@ -17,13 +17,13 @@ class MockConfigurable:
 
     def __init__(self) -> None:
         """Initialize mock with default config."""
-        self._config = Config(ftp=generate.ftp())
+        self._config = mcfg.Config(ftp=generate.ftp())
 
-    def load_file(self, _path: Path) -> Config:
+    def load_file(self, _path: Path) -> mcfg.Config:
         """Mock load_file implementation."""
-        return Config(ftp=generate.ftp(), device_address=generate.mac_address())
+        return mcfg.Config(ftp=generate.ftp(), device_address=generate.mac_address())
 
-    def write_file(self, _path: Path, _config: Config) -> None:
+    def write_file(self, _path: Path, _config: mcfg.Config) -> None:
         """Mock write_file implementation."""
 
 
@@ -41,23 +41,23 @@ class MockRunnable:
 
 def test_configurable_protocol_load_file() -> None:
     """Configurable implementations should load config from file."""
-    configurable: AppConfig = MockConfigurable()
+    configurable: bts.AppConfig = MockConfigurable()
     config = configurable.load_file(Path("test.toml"))
-    assert isinstance(config, Config)
+    assert isinstance(config, mcfg.Config)
     assert config.device_address is not None
     assert config.ftp is not None
 
 
 def test_configurable_protocol_write_file() -> None:
     """Configurable implementations should write config to file."""
-    configurable: AppConfig = MockConfigurable()
+    configurable: bts.AppConfig = MockConfigurable()
     config = generate.config()
     configurable.write_file(Path("test.toml"), config)
 
 
 def test_runnable_protocol_start() -> None:
     """Runnable implementations should start correctly."""
-    runnable: AppRunner = MockRunnable()
+    runnable: bts.AppRunner = MockRunnable()
     runnable.start()
     assert runnable.started
 
@@ -68,17 +68,17 @@ async def test_bootstrap_app_existing_config_connects(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     existing_config = generate.config()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
     config_handler.write_file(config_path, existing_config)
 
     mock_setup_ui = MagicMock()
     mock_scanner = AsyncMock()
     mock_scanner.connect.return_value = True
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is not None
-    assert isinstance(result, BootstrapResult)
+    assert isinstance(result, bts.BootstrapResult)
     assert result.config.ftp == existing_config.ftp
     assert result.config.device_address == existing_config.device_address
     assert result.demo_mode is False
@@ -92,16 +92,16 @@ async def test_bootstrap_app_missing_config_selects_trainer(tmp_path: Path) -> N
     test_ftp = generate.ftp()
     test_trainer = generate.trainer_info()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-    mock_setup_ui.prompt_trainer_selection.return_value = TrainerSelected(trainer=test_trainer)
+    mock_setup_ui.prompt_trainer_selection.return_value = trn.TrainerSelected(trainer=test_trainer)
 
     mock_scanner = AsyncMock()
     mock_scanner.scan.return_value = [test_trainer]
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is not None
     assert result.config.ftp == test_ftp
@@ -116,14 +116,14 @@ async def test_bootstrap_app_user_exits_ftp(tmp_path: Path) -> None:
     """bootstrap_app returns None when user exits during FTP prompt."""
     config_path = tmp_path / "config.toml"
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = None
 
     mock_scanner = AsyncMock()
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is None
     mock_setup_ui.prompt_ftp.assert_called_once()
@@ -136,16 +136,16 @@ async def test_bootstrap_app_user_exits_trainer_selection(tmp_path: Path) -> Non
     config_path = tmp_path / "config.toml"
     test_ftp = generate.ftp()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-    mock_setup_ui.prompt_trainer_selection.return_value = UserAction.EXIT
+    mock_setup_ui.prompt_trainer_selection.return_value = trn.UserAction.EXIT
 
     mock_scanner = AsyncMock()
     mock_scanner.scan.return_value = []
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is None
 
@@ -156,16 +156,16 @@ async def test_bootstrap_app_demo_mode(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     test_ftp = generate.ftp()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
-    mock_setup_ui.prompt_trainer_selection.return_value = UserAction.DEMO
+    mock_setup_ui.prompt_trainer_selection.return_value = trn.UserAction.DEMO
 
     mock_scanner = AsyncMock()
     mock_scanner.scan.return_value = []
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is not None
     assert result.demo_mode is True
@@ -180,18 +180,18 @@ async def test_bootstrap_app_connection_failed_scan(tmp_path: Path) -> None:
     existing_config = generate.config()
     new_trainer = generate.trainer_info()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
     config_handler.write_file(config_path, existing_config)
 
     mock_setup_ui = MagicMock()
-    mock_setup_ui.prompt_reconnect.return_value = UserAction.SCAN
-    mock_setup_ui.prompt_trainer_selection.return_value = TrainerSelected(trainer=new_trainer)
+    mock_setup_ui.prompt_reconnect.return_value = trn.UserAction.SCAN
+    mock_setup_ui.prompt_trainer_selection.return_value = trn.TrainerSelected(trainer=new_trainer)
 
     mock_scanner = AsyncMock()
     mock_scanner.connect.return_value = False
     mock_scanner.scan.return_value = [new_trainer]
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is not None
     assert result.config.device_address == new_trainer.address
@@ -206,19 +206,19 @@ async def test_bootstrap_app_retry_then_success(tmp_path: Path) -> None:
     test_ftp = generate.ftp()
     test_trainer = generate.trainer_info()
 
-    config_handler = TomlConfig()
+    config_handler = cfg.TomlConfig()
 
     mock_setup_ui = MagicMock()
     mock_setup_ui.prompt_ftp.return_value = test_ftp
     mock_setup_ui.prompt_trainer_selection.side_effect = [
-        UserAction.RETRY,
-        TrainerSelected(trainer=test_trainer),
+        trn.UserAction.RETRY,
+        trn.TrainerSelected(trainer=test_trainer),
     ]
 
     mock_scanner = AsyncMock()
     mock_scanner.scan.return_value = [test_trainer]
 
-    result = await bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
+    result = await bts.bootstrap_app(config_path, config_handler, mock_setup_ui, mock_scanner)
 
     assert result is not None
     assert result.config.device_address == test_trainer.address

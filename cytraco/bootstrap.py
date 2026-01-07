@@ -5,25 +5,19 @@ are implemented by higher layers following the dependency inversion principle.
 
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from pathlib import Path
+from typing import Protocol
 
-from cytraco.model.config import Config
-from cytraco.trainer import TrainerSelected, UserAction
-
-if TYPE_CHECKING:
-    from pathlib import Path
-
-    from cytraco.trainer import TrainerInfo, TrainerResult
+import cytraco.trainer as trn
+from cytraco.model import config as cfg
 
 
 @dataclass
 class BootstrapResult:
     """Result of bootstrap process."""
 
-    config: Config
+    config: cfg.Config
     demo_mode: bool = False
 
 
@@ -42,7 +36,7 @@ class SetupUI(Protocol):
         """
         ...
 
-    def prompt_reconnect(self, address: str) -> TrainerResult:
+    def prompt_reconnect(self, address: str) -> trn.TrainerResult:
         """Ask user how to proceed when configured trainer is unreachable.
 
         Args:
@@ -53,7 +47,7 @@ class SetupUI(Protocol):
         """
         ...
 
-    def prompt_trainer_selection(self, trainers: list[TrainerInfo]) -> TrainerResult:
+    def prompt_trainer_selection(self, trainers: list[trn.TrainerInfo]) -> trn.TrainerResult:
         """Show discovered trainers and let user select one.
 
         Args:
@@ -72,7 +66,7 @@ class AppConfig(Protocol):
     to/from files.
     """
 
-    def load_file(self, path: Path) -> Config:
+    def load_file(self, path: Path) -> cfg.Config:
         """Load configuration from file.
 
         Args:
@@ -87,7 +81,7 @@ class AppConfig(Protocol):
         """
         ...
 
-    def write_file(self, path: Path, config: Config) -> None:
+    def write_file(self, path: Path, config: cfg.Config) -> None:
         """Write configuration to a file.
 
         Args:
@@ -107,7 +101,7 @@ class TrainerScanner(Protocol):
     and attempt connections.
     """
 
-    async def scan(self) -> list[TrainerInfo]:
+    async def scan(self) -> list[trn.TrainerInfo]:
         """Scan for available trainers.
 
         Returns:
@@ -176,20 +170,17 @@ async def bootstrap_app(
     if config_path.exists():
         config = config_handler.load_file(config_path)
     else:
-        ftp_value = setup_ui.prompt_ftp()
-        if ftp_value is None:
+        if (ftp_value := setup_ui.prompt_ftp()) is None:
             return None
-        config = Config(ftp=ftp_value)
+        config = cfg.Config(ftp=ftp_value)
 
     # Handle trainer selection
     while True:
         if config.device_address:
             # Try to connect to configured trainer
-            connected = await trainer_scanner.connect(config.device_address)
-            if connected:
+            if await trainer_scanner.connect(config.device_address):
                 config_handler.write_file(config_path, config)
                 return BootstrapResult(config=config, demo_mode=False)
-
             # Connection failed, ask user what to do
             result = setup_ui.prompt_reconnect(config.device_address)
         else:
@@ -198,19 +189,19 @@ async def bootstrap_app(
             result = setup_ui.prompt_trainer_selection(trainers)
 
         # Handle user's choice
-        if isinstance(result, TrainerSelected):
+        if isinstance(result, trn.TrainerSelected):
             config.device_address = result.trainer.address
             config_handler.write_file(config_path, config)
             return BootstrapResult(config=config, demo_mode=False)
 
-        if result == UserAction.EXIT:
+        if result == trn.UserAction.EXIT:
             return None
 
-        if result == UserAction.DEMO:
+        if result == trn.UserAction.DEMO:
             config_handler.write_file(config_path, config)
             return BootstrapResult(config=config, demo_mode=True)
 
-        if result == UserAction.SCAN:
+        if result == trn.UserAction.SCAN:
             config.device_address = None  # Clear to trigger scan on next iteration
 
         # RETRY continues the loop

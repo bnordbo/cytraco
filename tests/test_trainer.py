@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+import cytraco.trainer as trn
 from cytraco import errors
-from cytraco.model.config import Config
-from cytraco.trainer import detect_trainer, scan_for_trainers
+from cytraco.model import config as cfg
 from tests import generators as generate
 
 
@@ -29,7 +29,8 @@ async def test_scan_for_trainers_finds_trainers(monkeypatch: pytest.MonkeyPatch)
     )
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    trainers = await scan_for_trainers()
+    scanner = trn.BleakTrainerScanner()
+    trainers = await scanner.scan()
 
     assert len(trainers) == 1
     assert trainers[0].name == trainer.name
@@ -44,7 +45,8 @@ async def test_scan_for_trainers_calls_discover(monkeypatch: pytest.MonkeyPatch)
     mock_discover = AsyncMock(return_value={})
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    await scan_for_trainers()
+    scanner = trn.BleakTrainerScanner()
+    await scanner.scan()
 
     mock_discover.assert_called_once()
 
@@ -55,7 +57,8 @@ async def test_scan_for_trainers_no_trainers(monkeypatch: pytest.MonkeyPatch) ->
     mock_discover = AsyncMock(return_value={})
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    trainers = await scan_for_trainers()
+    scanner = trn.BleakTrainerScanner()
+    trainers = await scanner.scan()
 
     assert len(trainers) == 0
 
@@ -66,8 +69,9 @@ async def test_scan_for_trainers_error_handling(monkeypatch: pytest.MonkeyPatch)
     mock_discover = AsyncMock(side_effect=Exception("BLE error"))
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
+    scanner = trn.BleakTrainerScanner()
     with pytest.raises(errors.DeviceError) as exc_info:
-        await scan_for_trainers()
+        await scanner.scan()
 
     assert "BLE scan failed" in str(exc_info.value)
 
@@ -88,7 +92,8 @@ async def test_scan_for_trainers_unknown_name(monkeypatch: pytest.MonkeyPatch) -
     )
     monkeypatch.setattr("cytraco.trainer.bleak.BleakScanner.discover", mock_discover)
 
-    trainers = await scan_for_trainers()
+    scanner = trn.BleakTrainerScanner()
+    trainers = await scanner.scan()
 
     assert len(trainers) == 1
     assert trainers[0].name == "Unknown"
@@ -116,7 +121,7 @@ async def test_detect_trainer_single_trainer_persists(monkeypatch: pytest.Monkey
     mock_config_handler.load_file.side_effect = FileNotFoundError("File not found")
     config_path = Path("/fake/config.toml")
 
-    result = await detect_trainer(mock_config_handler, config_path)
+    result = await trn.detect_trainer(mock_config_handler, config_path)
 
     assert result.name == trainer.name
     assert result.address == trainer.address
@@ -149,13 +154,13 @@ async def test_detect_trainer_preserves_ftp(monkeypatch: pytest.MonkeyPatch) -> 
     # Mock AppConfig with existing FTP
     existing_ftp = generate.ftp()
     mock_config_handler = MagicMock()
-    mock_config_handler.load_file.return_value = Config(
+    mock_config_handler.load_file.return_value = cfg.Config(
         ftp=existing_ftp,
         device_address=generate.mac_address(),
     )
     config_path = Path("/fake/config.toml")
 
-    await detect_trainer(mock_config_handler, config_path)
+    await trn.detect_trainer(mock_config_handler, config_path)
 
     # Verify config was written with preserved FTP
     mock_config_handler.write_file.assert_called_once()
@@ -175,7 +180,7 @@ async def test_detect_trainer_no_trainers(monkeypatch: pytest.MonkeyPatch) -> No
     config_path = Path("/fake/config.toml")
 
     with pytest.raises(errors.DeviceError, match="No trainers found"):
-        await detect_trainer(mock_config_handler, config_path)
+        await trn.detect_trainer(mock_config_handler, config_path)
 
     # Verify config was not written
     mock_config_handler.write_file.assert_not_called()
@@ -211,7 +216,7 @@ async def test_detect_trainer_multiple_trainers(monkeypatch: pytest.MonkeyPatch)
     config_path = Path("/fake/config.toml")
 
     with pytest.raises(errors.DeviceError, match="Found 2 trainers"):
-        await detect_trainer(mock_config_handler, config_path)
+        await trn.detect_trainer(mock_config_handler, config_path)
 
     # Verify config was not written
     mock_config_handler.write_file.assert_not_called()
