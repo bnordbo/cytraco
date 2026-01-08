@@ -1,0 +1,264 @@
+tests/test_ui_setup.py
+    LOC: 235
+    LLOC: 179
+    SLOC: 145
+    Comments: 2
+    Single comments: 24
+    Multi: 0
+    Blank: 66
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 1%
+tests/test_errors.py
+    LOC: 45
+    LLOC: 30
+    SLOC: 24
+    Comments: 0
+    Single comments: 6
+    Multi: 0
+    Blank: 15
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+tests/test_power.py
+    LOC: 17
+    LLOC: 12
+    SLOC: 9
+    Comments: 0
+    Single comments: 3
+    Multi: 0
+    Blank: 5
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+tests/__init__.py
+    LOC: 1
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 1
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+tests/test_workout.py
+    LOC: 59
+    LLOC: 48
+    SLOC: 35
+    Comments: 2
+    Single comments: 9
+    Multi: 0
+    Blank: 15
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 6%
+        (C + M % L): 3%
+tests/generators.py
+    LOC: 40
+    LLOC: 22
+    SLOC: 20
+    Comments: 1
+    Single comments: 7
+    Multi: 0
+    Blank: 13
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 5%
+        (C + M % L): 2%
+tests/test_config.py
+    LOC: 122
+    LLOC: 84
+    SLOC: 74
+    Comments: 2
+    Single comments: 12
+    Multi: 0
+    Blank: 36
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 3%
+        (C + M % L): 2%
+tests/test_bootstrap.py
+    LOC: 226
+    LLOC: 159
+    SLOC: 141
+    Comments: 1
+    Single comments: 19
+    Multi: 0
+    Blank: 66
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 1%
+        (C + M % L): 0%
+tests/test_trainer.py
+    LOC: 222
+    LLOC: 148
+    SLOC: 149
+    Comments: 8
+    Single comments: 18
+    Multi: 0
+    Blank: 55
+    - Comment Stats
+        (C % L): 4%
+        (C % S): 5%
+        (C + M % L): 4%
+cytraco/bootstrap.py
+    LOC: 207
+    LLOC: 73
+    SLOC: 61
+    Comments: 8
+    Single comments: 8
+    Multi: 84
+    Blank: 54
+    - Comment Stats
+        (C % L): 4%
+        (C % S): 13%
+        (C + M % L): 44%
+cytraco/config.py
+    LOC: 64
+    LLOC: 32
+    SLOC: 30
+    Comments: 2
+    Single comments: 4
+    Multi: 16
+    Blank: 14
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 7%
+        (C + M % L): 28%
+cytraco/workout.py
+    LOC: 47
+    LLOC: 16
+    SLOC: 11
+    Comments: 0
+    Single comments: 1
+    Multi: 22
+    Blank: 13
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 47%
+cytraco/__init__.py
+    LOC: 1
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 1
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+cytraco/cli.py
+    LOC: 51
+    LLOC: 38
+    SLOC: 35
+    Comments: 0
+    Single comments: 2
+    Multi: 4
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 8%
+cytraco/errors.py
+    LOC: 45
+    LLOC: 11
+    SLOC: 5
+    Comments: 0
+    Single comments: 1
+    Multi: 19
+    Blank: 20
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 42%
+cytraco/trainer.py
+    LOC: 142
+    LLOC: 69
+    SLOC: 61
+    Comments: 2
+    Single comments: 9
+    Multi: 32
+    Blank: 40
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 3%
+        (C + M % L): 24%
+cytraco/ui/__init__.py
+    LOC: 1
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 1
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+cytraco/ui/setup.py
+    LOC: 136
+    LLOC: 105
+    SLOC: 100
+    Comments: 0
+    Single comments: 2
+    Multi: 16
+    Blank: 18
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 12%
+cytraco/model/config.py
+    LOC: 16
+    LLOC: 9
+    SLOC: 5
+    Comments: 0
+    Single comments: 1
+    Multi: 5
+    Blank: 5
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 31%
+cytraco/model/__init__.py
+    LOC: 1
+    LLOC: 1
+    SLOC: 0
+    Comments: 0
+    Single comments: 1
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+cytraco/model/power.py
+    LOC: 14
+    LLOC: 7
+    SLOC: 4
+    Comments: 0
+    Single comments: 1
+    Multi: 4
+    Blank: 5
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 29%
+** Total **
+    LOC: 1692
+    LLOC: 1046
+    SLOC: 909
+    Comments: 28
+    Single comments: 131
+    Multi: 202
+    Blank: 450
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 3%
+        (C + M % L): 14%

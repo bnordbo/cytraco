@@ -72,7 +72,6 @@ cat <<EOF
 *** Review iteration changes (commits 2-$TOTAL_COMMITS)
 - Files modified :: $ITER_FILES
 - Changes :: +$ITER_INSERTIONS, -$ITER_DELETIONS lines (net $ITER_NET lines)
-- Code became smaller and cleaner through review!
 
 ** Development Process
 
