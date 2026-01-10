@@ -1,5 +1,10 @@
 """Trainer detection and BLE scanning. Alias: trn."""
 
+# ruff: noqa: S311
+
+import asyncio
+import contextlib
+import random
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -9,6 +14,7 @@ import bleak
 
 import cytraco.model.config as cfg
 from cytraco import errors
+from cytraco.model.power import PowerData
 
 
 class ConfigHandler(Protocol):
@@ -140,3 +146,75 @@ async def detect_trainer(config_handler: ConfigHandler, config_path: Path) -> Tr
     config_handler.write_file(config_path, config)
 
     return trainer
+
+
+class DemoPowerMeter:
+    """Demo power meter producing synthetic power data.
+
+    Simulates realistic power output with variations and drift. Useful for
+    testing and development when no physical trainer is available.
+    """
+
+    def __init__(self, base_power: int = 200, update_interval: float = 1.0) -> None:
+        """Initialize demo power meter.
+
+        Args:
+            base_power: Base power output in watts (default 200W)
+            update_interval: Time between power updates in seconds (default 1.0s)
+        """
+        self._base_power = base_power
+        self._update_interval = update_interval
+        self._queue: asyncio.Queue[PowerData] = asyncio.Queue()
+        self._task: asyncio.Task[None] | None = None
+        self._running = False
+
+    async def start(self) -> None:
+        """Start generating synthetic power data.
+
+        Begins continuous generation of PowerData objects with realistic
+        variations around base_power. Data is placed on the queue at
+        update_interval frequency.
+        """
+        if self._running:
+            return
+        self._running = True
+        self._task = asyncio.create_task(self._generate_power())
+
+    async def stop(self) -> None:
+        """Stop generating power data.
+
+        Stops the generation task. The queue remains accessible for
+        reading any remaining data.
+        """
+        self._running = False
+        if self._task:
+            self._task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self._task
+            self._task = None
+
+    @property
+    def queue(self) -> asyncio.Queue[PowerData]:
+        """Queue containing generated power measurements.
+
+        Returns:
+            Queue that receives synthetic PowerData objects.
+        """
+        return self._queue
+
+    async def _generate_power(self) -> None:
+        """Generate synthetic power data continuously.
+
+        Produces power values that vary realistically around base_power
+        with random fluctuations (±15W) and slight drift over time.
+        """
+        drift = 0.0
+        while self._running:
+            # Add random variation and slow drift
+            variation = random.randint(-15, 15)
+            drift += random.uniform(-2, 2)
+            drift = max(-30, min(30, drift))  # Limit drift to ±30W
+
+            power = max(0, int(self._base_power + variation + drift))
+            await self._queue.put(PowerData(power=power))
+            await asyncio.sleep(self._update_interval)

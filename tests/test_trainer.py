@@ -220,3 +220,74 @@ async def test_detect_trainer_multiple_trainers(monkeypatch: pytest.MonkeyPatch)
 
     # Verify config was not written
     mock_config_handler.write_file.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_start() -> None:
+    """DemoPowerMeter should start generating power data."""
+    meter = trn.DemoPowerMeter()
+    await meter.start()
+    assert meter._running  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_stop() -> None:
+    """DemoPowerMeter should stop generating power data."""
+    meter = trn.DemoPowerMeter()
+    await meter.start()
+    await meter.stop()
+    assert not meter._running  # noqa: SLF001
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_queue() -> None:
+    """DemoPowerMeter queue should provide PowerData objects."""
+    meter = trn.DemoPowerMeter(base_power=200, update_interval=0.01)
+    await meter.start()
+    data = await meter.queue.get()
+    await meter.stop()
+    assert data.power >= 0
+    assert isinstance(data.power, int)
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_power_range() -> None:
+    """DemoPowerMeter should generate power within expected range."""
+    base = 250
+    meter = trn.DemoPowerMeter(base_power=base, update_interval=0.01)
+    await meter.start()
+
+    # Collect several samples
+    samples = []
+    for _ in range(10):
+        data = await meter.queue.get()
+        samples.append(data.power)
+
+    await meter.stop()
+
+    # All samples should be within reasonable range of base
+    # (±15W variation + ±30W drift = max ±45W)
+    for power in samples:
+        assert base - 50 <= power <= base + 50
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_restart() -> None:
+    """DemoPowerMeter should handle multiple start/stop cycles."""
+    meter = trn.DemoPowerMeter(update_interval=0.01)
+    await meter.start()
+    await meter.stop()
+    await meter.start()
+    data = await meter.queue.get()
+    await meter.stop()
+    assert data.power >= 0
+
+
+@pytest.mark.asyncio
+async def test_demo_power_meter_idempotent_start() -> None:
+    """DemoPowerMeter should handle multiple start calls."""
+    meter = trn.DemoPowerMeter()
+    await meter.start()
+    await meter.start()
+    assert meter._running  # noqa: SLF001
+    await meter.stop()
