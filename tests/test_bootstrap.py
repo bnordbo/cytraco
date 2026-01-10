@@ -224,3 +224,61 @@ async def test_bootstrap_app_retry_then_success(tmp_path: Path) -> None:
     assert result.config.device_address == test_trainer.address
     # Two calls: first returns RETRY, second returns TrainerSelected
     assert mock_setup_ui.prompt_trainer_selection.call_count == mock_scanner.scan.call_count
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_demo_mode_existing_config(tmp_path: Path) -> None:
+    """bootstrap_demo_mode loads existing config."""
+    config_path = tmp_path / "config.toml"
+    existing_config = generate.config()
+
+    config_handler = cfg.TomlConfig()
+    config_handler.write_file(config_path, existing_config)
+
+    result = await bts.bootstrap_demo_mode(config_path, config_handler)
+
+    assert result.config.ftp == existing_config.ftp
+    assert result.config.device_address == existing_config.device_address
+    assert result.demo_mode is True
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_demo_mode_no_config(tmp_path: Path) -> None:
+    """bootstrap_demo_mode creates config with default FTP."""
+    config_path = tmp_path / "config.toml"
+
+    config_handler = cfg.TomlConfig()
+
+    result = await bts.bootstrap_demo_mode(config_path, config_handler)
+
+    assert result.config.ftp == bts.DEFAULT_FTP
+    assert result.config.device_address is None
+    assert result.demo_mode is True
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_demo_mode_creates_config_file(tmp_path: Path) -> None:
+    """bootstrap_demo_mode creates config file when missing."""
+    config_path = tmp_path / "config.toml"
+
+    config_handler = cfg.TomlConfig()
+
+    await bts.bootstrap_demo_mode(config_path, config_handler)
+
+    assert config_path.exists()
+    loaded_config = config_handler.load_file(config_path)
+    assert loaded_config.ftp == bts.DEFAULT_FTP
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_demo_mode_always_demo_true(tmp_path: Path) -> None:
+    """bootstrap_demo_mode always returns demo_mode=True."""
+    config_path = tmp_path / "config.toml"
+    existing_config = generate.config()
+
+    config_handler = cfg.TomlConfig()
+    config_handler.write_file(config_path, existing_config)
+
+    result = await bts.bootstrap_demo_mode(config_path, config_handler)
+
+    assert result.demo_mode is True
