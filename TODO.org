@@ -64,6 +64,13 @@ Enter a number (1–3) to continue, (r)etry or (e)xit.
 
 The trainer selection should happen after the user setup, if applicable. Cytraco should store the resulting configuration from the two steps in the same operation.
 
+
+*** DONE Implement a demo PowerMeter
+Create DemoPowerMeter that implements the PowerMeter protocol. It should produce synthetic data for the demo mode.
+
+*** TODO Implement basic CLI parsing with demo mode
+It should support a `--demo` switch to force demo mode. This should skip trainer selection, and pretend that Cytraco has connected to a trainer. It should run in demo mode, same as if the user selected this during the interactive startup.
+
 *** TODO Implement PowerMeter using Bleak
 Create BleakPowerMeter (real trainer using pycycling) and DemoPowerMeter (synthetic data for testing) that implement the PowerMeter protocol.
 

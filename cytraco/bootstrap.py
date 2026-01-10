@@ -12,6 +12,8 @@ from typing import Protocol
 import cytraco.model.config as cfg
 import cytraco.trainer as trn
 
+DEFAULT_FTP = 200
+
 
 @dataclass
 class BootstrapResult:
@@ -205,3 +207,34 @@ async def bootstrap_app(
             config.device_address = None  # Clear to trigger scan on next iteration
 
         # RETRY continues the loop
+
+
+async def bootstrap_demo_mode(
+    config_path: Path,
+    config_handler: AppConfig,
+    default_ftp: int = DEFAULT_FTP,
+) -> BootstrapResult:
+    """Bootstrap in demo mode, bypassing trainer selection.
+
+    Loads existing config or creates one with default FTP.
+    Always returns demo_mode=True. Useful for testing and development
+    when no physical trainer is available.
+
+    Args:
+        config_path: Path to configuration file.
+        config_handler: AppConfig implementation for loading/saving config.
+        default_ftp: Default FTP to use if no config exists (default: DEFAULT_FTP).
+
+    Returns:
+        BootstrapResult with config and demo_mode=True.
+
+    Raises:
+        ConfigError: If config file exists but cannot be loaded.
+    """
+    if config_path.exists():
+        config = config_handler.load_file(config_path)
+    else:
+        config = cfg.Config(ftp=default_ftp)
+        config_handler.write_file(config_path, config)
+
+    return BootstrapResult(config=config, demo_mode=True)
